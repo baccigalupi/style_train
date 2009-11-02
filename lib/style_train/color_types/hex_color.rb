@@ -1,0 +1,2 @@
+class HexColor < ColorType 
+end  

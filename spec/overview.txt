@@ -1,0 +1,150 @@
+StyleTrain - Ruby CSS generator 
+Similar Packages:
+  Sass - DSL easy nesting, variables
+  Less - more Rubyish than Sass, but still a DSL. nesting, variables  
+  
+Goals:
+  Shared with other packages:
+    Reduce repetition so updates can happen in just one place 
+    As such Keep colors and dimensions around as constants
+    Allow calculations with colors and dimensions
+  Unique and hopefully of value:
+    Be real Ruby instead of a parsed DSL
+    Allow Ruby inheritance, inclusion
+    Usable inline with Erector, etc
+
+Ideas on the domain:
+  style should allow inheritance
+  style allows non-inheritance mix in
+  style output to a string
+  
+  have set/collection object that aggregates a set of styles to a file or string
+  set/collection should allow inclusion of strings defining custom styles (browser workarounds)
+  should generate a reset.css Reset < StyleTrain::Set, includes the typical reset stuff 
+  
+  colors are saved in a pallete object
+  color can be added, subtracted, averaged with another color. 
+  color converts between color types # rgb() vs hex
+  
+  variables: color, size; should be constants that can be used in calculations
+  
+  a style should be able to calculate its full width and height, where applicable
+  a style can have a full_width, which will calculate width from borders &| margins &| padding
+  style full_width should work for max and min width too
+  style should be able to base its full_width on another style 
+
+
+USAGES:
+----------------------------------------------------
+General Usage:
+
+class Border < StyleTrain::Style
+  # ...
+end
+
+Border.to_s
+
+class ModifiedBorder < Border
+  # modifications
+end
+
+ModifiedBorder.to_s
+
+class BoxWithBorder < StyleTrain::Style
+  selector '.box.border'
+  include Border # or mixin Border
+end
+
+BoxWithBorder.to_s 
+# .box.border {
+#   border: 1px solid black;
+#   /* ... the rest of the box and border styles */
+# } 
+
+
+_______________________________________________________
+Set Usage
+
+css = StyleTrain::Set.new( BoxWithBorder, ... list of other styles )
+css.to_s
+# .box.border {
+#   border: 1px solid black;
+#   /* ... the rest of the box and border styles */
+# }
+# /* plus any other styles passed in to the initializer */
+css.add( '.panel .box.border', my_stlye ) # my_stlye can also be a Style class
+css.to_s # all the styles
+css.to_file # saves file (master.css) to location (if specified) or returns tempfile
+                                                      
+
+------------------------------------------------------
+Style Generation Usage:
+
+class Border < StyleTrain::Style
+  border 
+end
+
+Border.to_s
+# { border: 1px solid black; }  
+
+class Border < StyleTrain::Style
+  border :color => :white
+end
+
+Border.to_s
+# { border: 1px solid white; }  
+
+class Border < StyleTrain::Style
+  border :color => 'cdcdcd' # or :color => '#cdcdcd', or :color => 'rgb(...)'
+end
+
+Border.to_s
+# { border: 1px solid #cdcdcd; } 
+
+---------------------------------------------------------
+Palettes and Colors   
+
+class Colors < StyleTrain::Palette 
+  color :main_background => :ededed, :red => rgb(1,0,0) # etc
+end
+
+Colors[:main_background] + 'eee'
+Colors[:main_background].class # StyleTrain::Color 
+
+----------------------------------------------------------
+Including Classes ... what? Here is the concept in play
+class Classy 
+  def self.talk
+    'I am a class'
+  end  
+end  
+
+module Moduley
+  def self.talk
+    'I am a class'
+  end
+end
+
+class FlexibleClass
+  def self.include( thing )
+    if thing.class == Class
+      puts thing.talk + ' and am being included'
+    else
+      super
+    end
+  end
+end
+
+class MyFlexibleClass < FlexibleClass
+  include Classy
+end
+# this will puts out 'I am a class and am being included', it won't currently add any methods though     
+
+ 
+
+
+
+
+
+ 
+  

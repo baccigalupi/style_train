@@ -1,0 +1,2 @@
+class HSLcolor < ColorType 
+end     

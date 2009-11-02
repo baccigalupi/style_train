@@ -1,0 +1,2 @@
+class KeywordColor 
+end  
