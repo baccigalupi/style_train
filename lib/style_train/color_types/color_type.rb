@@ -1,4 +1,6 @@
-class ColorType
+class ColorType 
+  
+  # ERROR CLASSES
   class PercentageError < ArgumentError
     def message 
       @message ||= 'Percentages must be between 0 and 100'
@@ -16,29 +18,56 @@ class ColorType
       @message ||= 'Alpha must be between 0.0 and 1.0'
     end
   end
-   
+  
+  # ATTRIBUTES  
   attr_accessor :r, :g, :b 
   attr_reader :alpha
   
+  # INITIALIZATION
   def initialize( opts )
+    opts, color = unpack_opts( opts )
+    type_initialize( color, opts )
     self.alpha = opts[:alpha]
   end
+  
+  def type_initialize( color, opts ) 
+    raise ImplementationError, "type_initialize must be implemented for #{self}"
+  end  
+  
+  def unpack_opts( opts )
+    [ Gnash.new( opts ), opts[:color] ]
+  end  
   
   def alpha=( value )
     value = (value || 1.0).to_f
     raise AlphaError if value > 1.0 || value < 0.0
     @alpha = value 
-  end    
+  end 
+  
+  # INSTANCE METHODS 
+  def to( color_type )
+    klass = color_type_class(color_type)
+    raise ArgumentError, 'color type not supported' unless klass
+    self.class == klass ? self : klass.new( self )
+  end
+  
+  def to_s
+    raise ImplementationError, 'Subclasses of ColorType must implement #to_s'   
+  end  
+      
+  
+  # CLASS METHODS 
       
   # These can't contain real classes because it will create a dependency loop.
   def self.color_opts
-    @color_opts ||= Mash.new(
+    @color_opts ||= Gnash.new(
       :rgb => 'RGBcolor',
       :hsl => 'HSLcolor',
       :keyword => 'KeywordColor', 
       :hex => 'HexColor'
     ) 
-  end  
+  end 
+   
   # So they are replaced on usage with the actual constants, as needed
   def self.color_type_class( color_type )
     klass = color_opts[ color_type ]
@@ -56,16 +85,6 @@ class ColorType
         to( :#{color_type} )
       end  
     "    
-  end 
-        
-  def to( color_type )
-    klass = color_type_class(color_type)
-    raise ArgumentError, 'color type not supported' unless klass
-    self.class == klass ? self : klass.new( self )
-  end
-  
-  def to_s
-    raise ImplementationError, 'Subclasses of ColorType must implement #to_s'   
   end 
   
   def self.percentage( str )

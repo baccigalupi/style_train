@@ -1,14 +1,16 @@
 class RGBcolor < ColorType
   attr_accessor :red, :green, :blue # these are the entered values, not the calculated values 
   
-  def initialize( opts ) 
-    opts = Mash.new( opts )
-    color = opts[:color]
-    raise ArgumentError, 'RGB color must be initialized with a :color opts argument that is an array' unless color && color.class == Array
-    self.red =    color[0]
-    self.green =  color[1]
-    self.blue =   color[2]
-    super( opts )
+  def type_initialize( color, opts )
+    if color.class.ancestors.include?( ColorType )
+      # build from r, g, b
+    elsif color.class == Array  
+      self.red =    color[0]
+      self.green =  color[1]
+      self.blue =   color[2] 
+    else
+      raise ArgumentError, 'RGB color must be initialized with a :color opts argument that is an array' unless color && color.class == Array
+    end  
   end
   
   ['red', 'green', 'blue'].each do |clr|

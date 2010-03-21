@@ -3,7 +3,7 @@ class Color
   include Singleton
 
   # def self.make( color, opts={} ) 
-  #   opts = Mash.new( opts ).merge!(:color => color)
+  #   opts = Gnash.new( opts ).merge!(:color => color)
   #   if [String, Symbol].include?( color.class )
   #     if color.match(/^#/) || [3,6].include?( color.to_s.to_i.size )
   #       super( opts.merge( :init_type => :hex ) )

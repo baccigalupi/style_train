@@ -4,7 +4,7 @@ $LOAD_PATH.unshift( File.dirname(__FILE__) )
 require 'singleton'
 
 # Support stuff
-require 'style_train/support/mash'
+require 'style_train/support/gnash'
 require 'style_train/support/string'
 
 # The color load!

@@ -59,7 +59,18 @@ describe RGBcolor do
       color = RGBcolor.new(:color => ['0%', '50%', '100%'], :alpha => '0.5' )
       color.alpha.should == 0.5
     end      
-  end  
+  end
+  
+  it '#to_s should output the css string' do 
+    RGBcolor.new(:color => ['0%', '50%', '100%'], :alpha => 0.5 ).to_s.should ==
+      "rgba( 0%, 50%, 100%, 0.5 )"
+      
+   RGBcolor.new(:color => [255, 255, 255] ).to_s.should ==
+      "rgba( 255, 255, 255, 1.0 )"
+      
+   RGBcolor.new(:color => ['255', '255', '255'] ).to_s.should ==
+      "rgba( 255, 255, 255, 1.0 )"      
+  end    
       
   
 end  
