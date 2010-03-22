@@ -1,7 +1,6 @@
 # This is a delegator class that passes everything to the particular ColorType descendant
 class Color 
-  include Singleton
-
+  
   # def self.make( color, opts={} ) 
   #   opts = Gnash.new( opts ).merge!(:color => color)
   #   if [String, Symbol].include?( color.class )

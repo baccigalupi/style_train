@@ -1,10 +1,31 @@
 class RGBcolor < ColorType
-  attr_accessor :red, :green, :blue # these are the entered values, not the calculated values 
+  attr_reader :red, :green, :blue # these are the entered values, not the calculated values 
+
+  METHOD_MAP ={
+    'r' => 'red',
+    'g' => 'green',
+    'b' => 'blue'
+  } 
+  
+  ['red', 'green', 'blue'].each do |clr|
+    class_eval " 
+      def #{clr}=( value )
+        @#{clr} = value
+        self.#{clr[0..0]} = value  
+      end 
+    "
+  end  
+  
+  ['r', 'g', 'b'].each do |clr| 
+    class_eval "
+      def #{clr}=( value )
+        @#{clr} = normalize_internal_rgb( value )  
+      end  
+    "
+  end
   
   def type_initialize( color, opts )
-    if color.class.ancestors.include?( ColorType )
-      # build from r, g, b
-    elsif color.class == Array  
+    if color.is_a? Array  
       self.red =    color[0]
       self.green =  color[1]
       self.blue =   color[2] 
@@ -13,14 +34,11 @@ class RGBcolor < ColorType
     end  
   end
   
-  ['red', 'green', 'blue'].each do |clr|
-    class_eval " 
-      def #{clr}=( value )
-        @#{clr} = value
-        self.#{clr[0..0]} = normalize_internal_rgb( value )  
-      end 
-    "
-  end  
+  def build
+    self.red =    self.r
+    self.green =  self.g
+    self.blue =   self.b
+  end    
   
   def normalize_internal_rgb( value )
     if percentage = self.class.percentage( value )

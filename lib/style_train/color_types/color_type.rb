@@ -21,40 +21,72 @@ class ColorType
   
   # ATTRIBUTES  
   attr_accessor :r, :g, :b 
-  attr_reader :alpha
+  attr_reader :alpha 
   
   # INITIALIZATION
   def initialize( opts )
-    opts, color = unpack_opts( opts )
-    type_initialize( color, opts )
-    self.alpha = opts[:alpha]
+    if self.class.is_color?(opts)
+      build_from_color(opts)
+    else
+      opts = Gnash.new(opts)
+      color = opts[:color]
+      self.alpha = opts[:alpha] 
+      type_initialize( color, opts )
+    end  
   end
   
   def type_initialize( color, opts ) 
-    raise ImplementationError, "type_initialize must be implemented for #{self}"
+    raise NotYetImplemented, "type_initialize must be implemented for #{self}"
   end  
   
-  def unpack_opts( opts )
-    [ Gnash.new( opts ), opts[:color] ]
-  end  
-  
-  def alpha=( value )
-    value = (value || 1.0).to_f
+  def alpha=( value ) 
+    value = (value || 1.0).to_f   
     raise AlphaError if value > 1.0 || value < 0.0
     @alpha = value 
   end 
   
+  def build_from_color( color ) 
+    self.r = color.r
+    self.g = color.g
+    self.b = color.b
+    self.alpha = color.alpha
+    build
+  end 
+  
+  def build 
+    raise NotImplementedError, "#build must be implemented for #{self.class}"
+  end   
+  
+  def self.is_color?( color )
+    color.is_a? ColorType 
+  end 
+  
   # INSTANCE METHODS 
   def to( color_type )
-    klass = color_type_class(color_type)
+    klass = self.class.color_type_class(color_type)
     raise ArgumentError, 'color type not supported' unless klass
     self.class == klass ? self : klass.new( self )
   end
   
-  def to_s
-    raise ImplementationError, 'Subclasses of ColorType must implement #to_s'   
-  end  
-      
+  def render(opts=nil) 
+    alpha? ? render_as_rgba : render_as_given
+  end
+  
+  def to_s(opts=nil)
+    render(opts)
+  end   
+  
+  def render_as_given 
+    raise NotImplementedError, "#render_as_given must be implemented for #{self.class}"
+  end     
+  
+  def render_as_rgba
+    "rgba( #{self.r}, #{self.g}, #{self.b}, #{self.alpha} )"
+  end
+  
+  def alpha?
+    self.alpha != 1.0
+  end    
   
   # CLASS METHODS 
       

@@ -1,24 +1,55 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe "StyleTrain::Color" do
-  @color_types = { 
-      'html keywords' => ["gray"],  
-      'svg keywords' =>  ['linen', 'rgba( 250, 240, 230, 1.0 )'],
-      '3-digit hex string' => ['666'], 
-      '3-digit hex string with pound' => ["#666"], 
-      '6-digit hex string' => ["666666"],
-      '6-digit hex string with pound' => ['#666666'],
-      'rgb percentage array' => [ [127,127,127] ],
-      'rgb 0-255 array' => [ ['50%','50%','50%'] ],
-      'hsl percentages array' => [ [0, 0, 127] ],
-      'hsl 0-255 array' => [ ['0%', '0%', '50%'] ]
-   } 
+Color = StyleTrain::Color unless defined?(Color)
+
+describe Color do
+  before do
+    pending
+  end
+  
+  def act_like_color_type( color_class, args ) 
+    color_class.new(:color => args)
+  end   
    
-   @color_types.each do |color_type, value| 
-     @opts = color_type.match(/hsl/) ? {:hsl => true} : {}
-     it "should load the right color from #{color_type}" do
-       Color.new( value[0], @opts  ).to_s should == ( value[1] || "rgba( 127, 127, 127, 1.0 )" )
-     end  
-   end  
+  describe 'initialization' do
+    describe 'with a keyword' do
+      it 'should build an html keyword color' do
+        Color.new("gray").to_s.should act_like_color_type(KeywordColor, 'gray').to_s
+      end 
+
+      it 'should build a svg keyword color' do 
+        Color.new(:linen).to_s.should act_like_color_type(KeywordColor, :linen).to_s
+      end
+    end   
  
-en
+    describe 'with a hex string' do
+      it '(3-digit no #) should build a hex color' do 
+        Color.new('333').to_s.should act_like_color_type(HexColor, '333').to_s
+      end
+      
+      it '(3-digit with #) should build a hex color' do 
+        Color.new('#333').to_s.should act_like_color_type(HexColor, '#333').to_s
+      end
+      
+      it '(6-digit no #) should build a hex color' do  
+        Color.new('333333').to_s.should act_like_color_type(HexColor, '333333').to_s
+      end
+      
+      it '(6-digit with #) should build a hex color' do
+        Color.new('#333333').to_s.should act_like_color_type(HexColor, '#333333').to_s
+      end
+    end
+ 
+    describe 'with an rgb array' do
+      it '(with a byte array) should build a rgb color' do
+        Color.new([127,127,127]).to_s.should act_like_color_type(RGBcolor, [127,127,127]).to_s
+      end
+      
+      it '(with a percentage array) should build a rgb color' do
+        Color.new(['50%','50%','50%']).to_s.should act_like_color_type(RGBcolor, [127,127,127]).to_s
+      end
+    end
+    
+    describe 'hsl colors'   
+  end   
+end
