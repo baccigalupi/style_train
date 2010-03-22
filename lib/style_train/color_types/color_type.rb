@@ -62,12 +62,64 @@ class ColorType
   end 
   
   # INSTANCE METHODS 
+  # conversion
   def to( color_type )
     klass = self.class.color_type_class(color_type)
     raise ArgumentError, 'color type not supported' unless klass
     self.class == klass ? self : klass.new( self )
   end
   
+  # comparison
+  def =~( color )
+    color.is_a?(ColorType) && self.r == color.r && self.g == color.g && self.b == color.b
+  end
+  
+  def ==( color )
+    (self =~ color) && self.alpha == color.alpha
+  end 
+  
+  def ===( color )
+    (self == color) && self.class == color.class
+  end 
+  
+  # blending
+  def mix( color )
+    mixed = self.dup
+    mixed.r = self.class.average(self.r, color.r)
+    mixed.g = self.class.average(self.g, color.g)
+    mixed.b = self.class.average(self.b, color.b)
+    mixed.alpha = self.class.average(self.alpha, color.alpha, false)
+    mixed.build
+    mixed
+  end
+  
+  def layer( color )
+    layered = self.dup 
+    ratio = 1 - color.alpha
+    layered.r = self.class.blend( self.r, color.r, ratio )
+    layered.g = self.class.blend( self.g, color.g, ratio )
+    layered.b = self.class.blend( self.b, color.b, ratio )
+    layered.alpha = self.class.blend_alphas( self.alpha, color.alpha ) 
+    layered.build
+    layered
+  end
+  
+  def self.blend(first, second, ratio) 
+    blended = (first*ratio + second*(1-ratio)).round
+  end    
+  
+  def self.average(first, second, round=true)
+    averaged = ((first + second)/2.0)
+    round ? averaged.round : averaged
+  end 
+  
+  def self.blend_alphas(first, second)
+    base, blender = first > second ? [first, second] : [second, first]
+    difference = 1.0 - base
+    base + difference * blender
+  end         
+  
+  # rendering
   def render(opts=nil) 
     alpha? ? render_as_rgba : render_as_given
   end

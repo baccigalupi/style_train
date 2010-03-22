@@ -191,6 +191,161 @@ describe ColorType do
         end 
       end  
     end                  
+    
+    describe 'comparisons' do
+      before do
+        @hex = HexColor.new(:color => '#000')
+        @keyword = KeywordColor.new(:color => :black)
+      end
+       
+      describe '=~' do
+        it 'should be true if the r, g, b values are the same' do
+          (@hex =~ @keyword).should == true
+        end
+        
+        it 'should be true even if the alpha values are different' do
+          @hex.alpha = 0.5
+          (@hex =~ @keyword).should == true
+        end 
+      end
+      
+      describe '==' do
+        it 'should be true if the colors are =~ and also have the same alpha' do
+          (@hex == @keyword).should == true
+        end
+        
+        it 'should be false if the alphas are different' do 
+          @hex.alpha = 0.5
+          (@hex == @keyword).should == false
+        end
+        
+        it 'should be false if the r, g, b values are different' do
+          color = KeywordColor.new(:color => :maroon)
+          (color == @keyword).should == false
+        end
+      end
+      
+      describe '===' do
+        before do
+          @key2 = KeywordColor.new(:color => :black)
+        end
+          
+        it 'should be true if the colors are == and also have the same class' do
+          (@key2 === @keyword).should == true
+        end 
+        
+        it 'should be false if the classes are different' do
+          (@keyword === @hex).should == false
+        end
+        
+        it 'should be false if the alphas are different' do 
+          @key2.alpha = 0.5
+          (@key2 == @keyword).should == false
+        end
+        
+        it 'should be false if the r, g, b values are different' do
+          color = KeywordColor.new(:color => :maroon)
+          (color == @keyword).should == false
+        end 
+      end    
+    end
+    
+    describe 'mixing' do
+      before do
+        @rgb = RGBcolor.new(:color => [20,40,60], :alpha => 0.5)
+        @hex = HexColor.new(:color => '#666') 
+      end
+      
+      describe 'averaging' do
+        it 'should average the r, g, and b values' do
+          color = @rgb.mix(@hex)
+          color.r.should == ((102+20)/2.0).round
+          color.g.should == ((102+40)/2.0).round
+          color.b.should == ((102+60)/2.0).round
+        end 
+        
+        it 'should average the alpha' do
+          color = @rgb.mix(@hex)
+          color.alpha.should == 0.75
+        end
+        
+        it 'should return the original color type' do 
+          color = @rgb.mix(@hex)
+          color.class.should == RGBcolor
+          
+          color = @hex.mix(@rgb)
+          color.class.should == HexColor
+        end
+      end 
+      
+      describe 'layering' do
+        before do
+          @white = HexColor.new(:color => '#FFF')
+          @shadow = HexColor.new(:color => '#000', :alpha => 0.5)
+        end 
+        
+        it 'should blend on the class method' do
+          ColorType.blend(255, 0, 0.5).should == 128
+          ColorType.blend(128, 0, 0.5).should == 64
+          ColorType.blend(255, 0, 0.25).should == 64
+        end
+        
+        describe 'r, g, b' do
+          describe 'opaque top layer' do
+            it 'should have the r, g, b values of the top layer' do
+              color = @rgb.layer(@hex)
+              color.r.should == 102 
+              color.g.should == 102
+              color.b.should == 102 
+            end
+          end  
+        
+          describe 'opaque bottom layer' do
+            before do
+              @color = @white.layer(@shadow) 
+            end 
+          
+            it 'should mix the r, g, and b in proportion to the top layer\'s alpha' do
+              @color.r.should == 128
+              @color.g.should == 128
+              @color.b.should == 128 
+            
+              red = RGBcolor.new(:color => [153,0,0], :alpha => 0.25)
+              color = @white.layer(red)
+              color.r.should == (153*0.25 + 255*0.75).round
+              color.g.should == (0*0.25 + 255*0.75).round
+              color.b.should == (0*0.25 + 255*0.75).round
+            end
+          end
+        end
+        
+        describe 'alpha blending' do
+          it 'should be 1.0 if bottom layer is opaque' do 
+            color = @white.layer(@shadow)
+            color.alpha.should == 1.0
+          end
+          
+          it 'should be 1.0 if the top layer is opaque' do
+            color = @shadow.layer(@white)
+            color.alpha.should == 1.0
+          end   
+          
+          it 'should have an alpha greater than or equal to the composites' do
+            color = @rgb.layer(@shadow)
+            (color.alpha >= @rgb.alpha).should be_true
+            (color.alpha >= @shadow.alpha).should be_true
+          end
+          
+          it 'should calculate the blending of two alphas properly' do
+            color = @rgb.layer(@shadow)
+            color.alpha.should == 0.75 # 0.5 for the base color, plus 0.5 of the remaining transparency
+          end  
+        end 
+      end  
+      
+      describe 'stepping'
+      
+    end
 
     describe 'rendering' do
       # todo: do color specs first, to work out where the blending of background should happen
