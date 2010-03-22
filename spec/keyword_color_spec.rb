@@ -46,7 +46,11 @@ describe KeywordColor do
     end
   end 
   
-  describe '#to_s' do
+  describe 'rendering' do
+    it 'should render as given by default' do
+      light_yellow = KeywordColor.new(:color => :lightyellow)
+      light_yellow.render.should == 'lightyellow'
+    end
   end  
   
 end  

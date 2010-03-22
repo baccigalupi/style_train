@@ -71,7 +71,11 @@ class ColorType
   
   # comparison
   def =~( color )
-    color.is_a?(ColorType) && self.r == color.r && self.g == color.g && self.b == color.b
+    if color.is_a?( ColorType ) 
+      self.r == color.r && self.g == color.g && self.b == color.b 
+    elsif color.is_a?( Color )
+      self =~ color.delegate
+    end    
   end
   
   def ==( color )
@@ -141,14 +145,22 @@ class ColorType
   end    
   
   # CLASS METHODS 
+  
+  def self.make(opts)
+    begin
+      new(opts)
+    rescue
+      nil
+    end    
+  end  
       
   # These can't contain real classes because it will create a dependency loop.
   def self.color_opts
     @color_opts ||= Gnash.new(
       :rgb => 'RGBcolor',
-      :hsl => 'HSLcolor',
       :keyword => 'KeywordColor', 
-      :hex => 'HexColor'
+      :hex => 'HexColor' 
+      # :hsl => 'HSLcolor' # when this class exists
     ) 
   end 
    
@@ -160,16 +172,17 @@ class ColorType
     else
       klass
     end   
-  end    
-     
-  # Builds to_rgb ... etc
-  color_opts.keys.each do |color_type|
-    class_eval "
-      def to_#{color_type}( color )
-        to( :#{color_type} )
+  end
+  
+  def self.color_types  
+    unless @types_built
+      color_opts.each do |key, klass|
+        self.color_type_class( key )
       end  
-    "    
-  end 
+      @types_built = true
+    end   
+    color_opts.values
+  end      
   
   def self.percentage( str )
     if str.class == String && str.match(/^([\d.]*)%$/) 

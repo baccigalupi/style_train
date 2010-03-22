@@ -184,4 +184,8 @@ class KeywordColor < ColorType
     raise KeywordError, "Keyword match not found for color matching rgb( #{self.r}, #{self.g}, #{self.b} )" unless found 
   end
   
+  def render_as_given 
+    self.keyword.to_s
+  end  
+  
 end  

@@ -49,7 +49,7 @@ class RGBcolor < ColorType
     end
   end     
   
-  def to_s
-    "rgba( #{self.red}, #{self.green}, #{self.blue}, #{self.alpha} )"
+  def render_as_given
+    "rgb( #{self.red}, #{self.green}, #{self.blue} )"
   end  
 end  

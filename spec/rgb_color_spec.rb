@@ -44,7 +44,6 @@ describe RGBcolor do
     end
   end
   
-  
   # This should be a shared example
   describe 'alpha' do 
     it 'should be 1.0 by default' do
@@ -61,15 +60,15 @@ describe RGBcolor do
     end      
   end
   
-  it '#to_s should output the css string' do 
-    RGBcolor.new(:color => ['0%', '50%', '100%'], :alpha => 0.5 ).to_s.should ==
-      "rgba( 0%, 50%, 100%, 0.5 )"
+  it 'render should output rgb css tag' do 
+    RGBcolor.new(:color => ['0%', '50%', '100%'] ).render.should ==
+      "rgb( 0%, 50%, 100% )"
+    
+    RGBcolor.new(:color => [255, 255, 255] ).render.should ==
+      "rgb( 255, 255, 255 )"
       
-   RGBcolor.new(:color => [255, 255, 255] ).to_s.should ==
-      "rgba( 255, 255, 255, 1.0 )"
-      
-   RGBcolor.new(:color => ['255', '255', '255'] ).to_s.should ==
-      "rgba( 255, 255, 255, 1.0 )"      
+    RGBcolor.new(:color => ['255', '255', '255'] ).render.should ==
+      "rgb( 255, 255, 255 )"      
   end    
       
   

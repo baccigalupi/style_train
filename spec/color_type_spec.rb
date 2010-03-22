@@ -72,7 +72,7 @@ describe ColorType do
       end         
     end
   
-    describe 'is_color?' do
+    describe '#is_color?' do
       it 'should recognize any of the color types' do
         ColorType.is_color?(KeywordColor.new(:color => :linen)).should be_true
         ColorType.is_color?(RGBcolor.new(:color => [0,0,0])).should be_true
@@ -82,6 +82,16 @@ describe ColorType do
         ColorType.is_color?( nil ).should be_false
         ColorType.is_color?( {} ).should be_false
         ColorType.is_color?( [] ).should be_false
+      end
+    end
+  
+    describe '#make' do
+      it 'returns nil if not the right type' do
+        HexColor.make(:color => :lightyellow).should be_nil
+      end
+      
+      it 'returns an instance on the color type if arguments are correct' do
+        KeywordColor.make(:color => :lightyellow).is_a?(KeywordColor).should be_true
       end
     end
   end
@@ -206,6 +216,11 @@ describe ColorType do
         it 'should be true even if the alpha values are different' do
           @hex.alpha = 0.5
           (@hex =~ @keyword).should == true
+        end
+        
+        it 'should compare with the delagate of a color' do
+          (@hex =~ Color.new('#000')).should == true
+          (@hex =~ Color.new('#fff')).should == false
         end 
       end
       
