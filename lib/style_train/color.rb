@@ -63,8 +63,12 @@ class Color
     end  
   end
   
-  def render(render_style=nil)
-    self.delegate.render 
+  def render(render_style=nil) 
+    if render_style && render_style.to_sym == :ie
+      self.background.to(:hex).layer(self.delegate)
+    else  
+      self.delegate.render
+    end   
   end    
 
 end 
