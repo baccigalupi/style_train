@@ -4,13 +4,13 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{StyleTrain}
+  s.name = %q{style_train}
   s.version = "0.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kane Baccigalupi"]
   s.date = %q{2010-03-23}
-  s.description = %q{StyleTrain helps CSS with Ruby color classes}
+  s.description = %q{style_train helps CSS with Ruby color classes}
   s.email = %q{baccigalupi@gmail.com}
   s.extra_rdoc_files = [
     "README.rdoc"
@@ -37,6 +37,7 @@ Gem::Specification.new do |s|
      "spec/rgb_color_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
+     "style_train.gemspec",
      "utils/alexch_color_gist/color.rb",
      "utils/alexch_color_gist/color_test.rb",
      "utils/overview.txt"
@@ -45,7 +46,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}
-  s.summary = %q{StyleTrain helps CSS with Ruby color classes}
+  s.summary = %q{style_train helps CSS with Ruby color classes}
   s.test_files = [
     "spec/color_spec.rb",
      "spec/color_type_spec.rb",
