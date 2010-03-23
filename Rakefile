@@ -18,9 +18,9 @@ task :default => :spec
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "StyleTrain"
-    gem.summary = %Q{StyleTrain helps CSS with Ruby color classes}
-    gem.description = %Q{StyleTrain helps CSS with Ruby color classes}
+    gem.name = "style_train"
+    gem.summary = %Q{style_train helps CSS with Ruby color classes}
+    gem.description = %Q{style_train helps CSS with Ruby color classes}
     gem.email = "baccigalupi@gmail.com"
     gem.homepage = "http://github.com/baccigalupi/style_train"
     gem.authors = ["Kane Baccigalupi"]
