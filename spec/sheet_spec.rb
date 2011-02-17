@@ -514,22 +514,22 @@ describe Sheet do
       end
     end
   end
+
+  class StyleSheet < StyleTrain::Sheet
+    def content
+      body { 
+        background :color => '#666'
+        text :font => 'verdana' 
+      }
+      
+      style('#wrapper'){
+        background :color => :white
+        margin [1.em, :auto]
+      }
+    end
+  end
   
   describe 'subclassing' do
-    class StyleSheet < StyleTrain::Sheet
-      def content
-        body { 
-          background :color => '#666'
-          text :font => 'verdana' 
-        }
-        
-        style('#wrapper'){
-          background :color => :white
-          margin [1.em, :auto]
-        }
-      end
-    end
-    
     it 'works' do
       StyleSheet.render.should include( 
 <<-CSS
@@ -544,6 +544,35 @@ body {
 }
 CSS
       )
+    end
+  end
+  
+  describe 'export' do
+    before :all do
+      @dir = File.dirname(__FILE__) + "/generated_files"
+      StyleTrain.dir = @dir
+      Dir.chdir(@dir)
+    end
+    
+    before do
+      Dir.glob('*.css').each do |file|
+        File.delete(file)
+      end
+    end
+    
+    it 'exports to the StyleTrain dir location' do
+      StyleSheet.export
+      Dir.glob('*.css').size.should == 1
+    end
+    
+    it 'uses the class name underscored by default' do
+      StyleSheet.export
+      File.exist?(@dir + '/style_sheet.css').should == true
+    end
+    
+    it 'uses an alternate name when provided' do
+      StyleSheet.new.export(:file_name => 'foo')
+      File.exists?(@dir + 'foo')
     end
   end
 end

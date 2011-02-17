@@ -30,16 +30,19 @@ Gem::Specification.new do |s|
     "lib/style_train/sheet.rb",
     "lib/style_train/support/gnash.rb",
     "lib/style_train/support/numbers.rb",
-    "lib/style_train/support/string.rb",
+    "lib/style_train/theme.rb",
     "spec/color/color_spec.rb",
     "spec/color/color_type_spec.rb",
     "spec/color/hex_color_spec.rb",
     "spec/color/keyword_color_spec.rb",
     "spec/color/rgb_color_spec.rb",
+    "spec/generated_files/.gitkeep",
     "spec/numbers_spec.rb",
     "spec/sheet_spec.rb",
     "spec/spec.opts",
     "spec/spec_helper.rb",
+    "spec/style_train_spec.rb",
+    "spec/theme_spec.rb",
     "style_train.gemspec",
     "utils/alexch_color_gist/color.rb",
     "utils/alexch_color_gist/color_test.rb",
@@ -58,7 +61,9 @@ Gem::Specification.new do |s|
     "spec/color/rgb_color_spec.rb",
     "spec/numbers_spec.rb",
     "spec/sheet_spec.rb",
-    "spec/spec_helper.rb"
+    "spec/spec_helper.rb",
+    "spec/style_train_spec.rb",
+    "spec/theme_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -66,9 +71,12 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<active_support>, [">= 3.0.0"])
     else
+      s.add_dependency(%q<active_support>, [">= 3.0.0"])
     end
   else
+    s.add_dependency(%q<active_support>, [">= 3.0.0"])
   end
 end
 
