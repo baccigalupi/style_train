@@ -15,8 +15,6 @@ require 'style_train/color_types/hsl_color'
 require 'style_train/color_types/keyword_color'
 require 'style_train/color_types/hex_color'
 require "style_train/color"
-# require 'lib/palette'
 
 require "style_train/sheet"
-# require 'set'
-# require 'style'   
+require 'style_train/theme'   
