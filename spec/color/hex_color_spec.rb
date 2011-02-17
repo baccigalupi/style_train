@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 HexColor = StyleTrain::HexColor unless defined?( HexColor )
 
@@ -12,7 +12,7 @@ describe HexColor do
   describe 'initialization' do
     describe 'from another color' do
       it 'should convert correctly from a RGB color' do
-        color = RGBcolor.new(:color => [20, 40, 60])
+        color = StyleTrain::RGBcolor.new(:color => [20, 40, 60])
         hex = HexColor.new(color)
         hex.r.should == color.r
         hex.g.should == color.g

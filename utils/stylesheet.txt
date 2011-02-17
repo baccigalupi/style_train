@@ -1,0 +1,161 @@
+class FooSheet < StyleTrain::StyleSheet do
+  def content
+    add(:my_div) do
+      border :color => :gray
+      add(:p) do
+        font :size => 1.5.em
+      end
+    }
+  end
+end
+
+class FooSheet < StyleTrain::StyleSheet do
+  def content
+    << :my_div {
+      border :color => :gray
+      << :p {
+        font :size => 1.5.em
+      }
+    }
+  end
+end
+
+# builds foo_sheet.css
+<<-CSS
+  .my_div {
+    border: 1px solid gray;
+  }
+
+  .my_div p {
+    font-size: 1.5em;
+  }
+CSS
+
+# ---------------------
+
+<<-CSS
+  body { font-size: 13px; line-height: 1.5; #{theme[:sans]}; }
+
+  h1 {font-size: 25px;}
+  h2 {font-size: 23px;}
+  h3 {font-size: 18px;}
+  h3 { margin: 0; }
+  h4 {font-size: 16px;}
+  h5 {font-size: 11px;}
+  h6 {font-size: 10px;}
+
+  hr {
+  	border: none;
+  	height: 1px;
+  	color: #{Theme::COHUMAN[:light_grey]};
+  	background-color: #{Theme::COHUMAN[:light_grey]};
+  }
+  
+  .create_button{
+  	font-weight: bold;
+  	font-size:.8em;
+  	cursor: pointer;
+  	padding: 0 0.5em;
+  	color: #{theme[:button_text]};
+  	border: 1px solid #{theme[:button_border]};
+  }
+  
+  .activity_button {
+  	display:inline-block;
+  	overflow:visible;
+  	padding:0;
+  	position:relative;
+  	font-weight: bold;
+  	font-size:.8em;
+  	cursor: pointer;
+  	color: #{theme[:button_text]};
+  	border: 1px solid #{theme[:activity_button_border]};
+  }
+  
+  .user_info { 
+  	padding: 10px 10px 0px 10px;
+  	width: #{Panel::WIDTH - 20}px;
+  	overflow-x: hidden;
+  }
+
+  .user_info h1 {
+  	margin: -4px 0 -2px 0;
+  	font-size:1.5em;
+  }
+  
+  .user_info h1 < div {
+    padding: 2em;
+  }
+  
+  .user_info h1 < p {
+    padding: 1em;
+  }
+  
+CSS
+
+class Cohuman < StyleTrain::Sheet
+  def content
+    body {
+      font :size => 13.px, :family => theme[:sans]
+      line_height 1.5
+    }
+    
+    h1 { font :size => 25.px}
+    h2 { font :size => 23.px}
+    h3 { font :size => 18.px}
+    h3 { margin :none }
+    h4 { font :size => 16.px}
+    h5 { font :size => 11.px}
+    h6 { font :size => 10.px}
+    
+    hr {
+      border :none
+      height 1.px
+      color theme[:neutral][1]
+      background :color => theme[:light_gray]
+    }
+    
+    selector(:create_button) {
+      font :weight => :bold, :size => 8.em
+      border :color => theme[:button_border]
+      color theme[:button_text]
+      cursor :pointer
+      padding [0 0.5.em]
+    }
+    
+    selector(:activity_button) {
+    	display :inline_block
+    	position :relative
+    	overflow :visible
+    	padding :none
+    	font :weight => :bold, :size => 0.8.em
+    	cursor :pointer
+    	color theme[:button_text]}
+    	border :color => theme[:activity_button_border]
+    }
+    
+    +(:user_info) { 
+    	padding 10.px, 10.px 0.px 10.px
+    	width (Panel::WIDTH - 20).px;
+    	overflow :x => :hidden
+    	
+    	h1 {
+    	  margin -4.px, 0, -2px, 0
+    	  font :size => 1.5.em
+    	}
+    	
+    	<(:my_class){
+    	  padding 2.em
+    	}
+    	
+    	<(p){
+    	  padding 1.em
+    	}
+    }
+  end
+end
+
+# Floats and Fixnums should respond to .em .px, etc
+# methods for each of the html tags
+# Sheet class has methods for all css attributes
+# Sheet class should take an optional theme, have theme attribute

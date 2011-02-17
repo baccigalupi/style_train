@@ -1,3 +1,5 @@
 # todo: when needed
-class HSLcolor < ColorType 
+module StyleTrain
+  class HSLcolor < ColorType 
+  end
 end     

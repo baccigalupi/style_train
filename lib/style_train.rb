@@ -6,6 +6,7 @@ require 'singleton'
 # Support stuff
 require 'style_train/support/gnash'
 require 'style_train/support/string'
+require 'style_train/support/numbers'
 
 # The color load!
 require 'style_train/color_types/color_type'
@@ -16,6 +17,6 @@ require 'style_train/color_types/hex_color'
 require "style_train/color"
 # require 'lib/palette'
 
-
+require "style_train/sheet"
 # require 'set'
 # require 'style'   

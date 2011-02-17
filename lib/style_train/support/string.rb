@@ -15,6 +15,10 @@ unless String.instance_methods.include?( 'constantize' )
       end
 
       Object.module_eval("::#{$1}", __FILE__, __LINE__)
+    end
+    
+    def dasherize
+      self.gsub('_', '-') || self
     end 
   end  
 end  

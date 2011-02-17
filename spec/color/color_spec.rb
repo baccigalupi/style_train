@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 Color = StyleTrain::Color unless defined?(Color)
 HexColor = StyleTrain::HexColor unless defined?( HexColor )
@@ -6,15 +6,48 @@ KeywordColor = StyleTrain::KeywordColor unless defined?( KeywordColor )
 RGBcolor = StyleTrain::RGBcolor unless defined?( RGBcolor )
 
 describe Color do
-  before do
-    #pending
-  end
-  
   def build_color_type( color_class, args ) 
     color_class.new(:color => args)
-  end   
+  end
+  
+  describe 'alpha' do
+    it 'should be delegated' do
+      color = Color.new(:black, :alpha => 0.5)
+      color.alpha.should == 0.5
+    end 
+  
+    it 'setter should be delegated' do 
+      color = Color.new(:black)
+      color.alpha = 0.5
+      color.delegate.alpha.should == 0.5
+    end  
+  end  
    
   describe 'initialization' do
+    describe 'with an existing color' do
+      it 'should build a delegate of the existing type' do 
+        Color.new(Color.new(:white)).delegate.should == build_color_type(KeywordColor, :white)
+        Color.new(Color.new('#FFF')).delegate.should == build_color_type(HexColor, '#FFF')
+        Color.new(Color.new([255,255,255])).delegate.should == build_color_type(RGBcolor, [255,255,255])
+      end
+      
+      it 'should set the background if the argument color has a background' do
+        Color.new(Color.new(:white), :background => :gray).background.should == Color.new(:gray)
+        Color.new(Color.new(:white)).background_set.should_not be_true
+      end
+      
+      it 'after the new color is created changes to the delegate should not change the original' do
+        original = Color.new(:white)
+        new_color = Color.new(original, :background => :black, :alpha => 0.5)
+        original.alpha.should == 1.0
+      end 
+      
+      it 'should set the alpha' do
+        color = Color.new(Color.new(:white), :alpha => 0.5)
+        color.alpha.should == 0.5
+      end        
+    end 
+     
     describe 'assigns a delegate' do
       describe 'with a keyword argument' do
         it 'should build an html keyword color' do
@@ -142,6 +175,15 @@ describe Color do
       color = Color.new(:black, :background => :yellow)
       color.background.should =~ Color.new(:yellow)
     end
+    
+    it 'should set a flag when it is set not by default' do
+      color = Color.new(:black) 
+      color.background
+      color.background_set.should_not == true
+      
+      color = Color.new(:black, :background => :yellow)
+      color.background_set.should == true
+    end
   end
   
   describe 'rendering' do
@@ -160,19 +202,23 @@ describe Color do
     end
     
     describe 'ie' do
-      it 'should render default if there is no transparency' do 
-        Color.new(:white).render(:ie).should == build_color_type(KeywordColor, :white).render_as_given
-        Color.new(['100%', '100%', '100%']).render(:ie).should == build_color_type(RGBcolor, ['100%', '100%', '100%']).render_as_given
-        Color.new([255,255,255]).render(:ie).should == build_color_type(RGBcolor, [255,255,255]).render_as_given
-        Color.new('#FFF').render(:ie).should == build_color_type(HexColor, '#FFF').render_as_given 
+      it 'should render as a hex color' do 
+        Color.new(:white).render(:ie).should == build_color_type(HexColor, '#ffffff').render_as_given
+        Color.new(['100%', '100%', '100%']).render(:ie).should == build_color_type(HexColor, '#ffffff').render_as_given
+        Color.new([255,255,255]).render(:ie).should == build_color_type(HexColor, '#ffffff').render_as_given
+        Color.new('#FFF').render(:ie).should == build_color_type(HexColor, '#ffffff').render_as_given 
       end 
       
-      it 'should render delegate layered on the background if there is transparency' do
-        Color.new(:black, :alpha => 0.5).render(:ie).should == build_color_type( RGBcolor, [128,128,128] )
-        Color.new(['0%', '0%', '0%'], :alpha => 0.5).render(:ie).should == build_color_type( RGBcolor, [128,128,128] )
-        Color.new([255,255,255], :alpha => 0.5, :background => :black).render(:ie).should == build_color_type( RGBcolor, [128,128,128] )
-        Color.new('#FFF', :alpha => 0.5, :background => :black).render(:ie).should == build_color_type( RGBcolor, [128,128,128] )    
+      it 'should render delegate layered on the background if there is transparency and as a hex color' do
+        Color.new(:black, :alpha => 0.5).render(:ie).should == build_color_type( HexColor, '#808080' ).render
+        Color.new(['0%', '0%', '0%'], :alpha => 0.5).render(:ie).should == build_color_type( HexColor, '#808080' ).render
+        Color.new([255,255,255], :alpha => 0.5, :background => :black).render(:ie).should == build_color_type( HexColor, '#808080' ).render
+        Color.new('#FFF', :alpha => 0.5, :background => :black).render(:ie).should == build_color_type( HexColor, '#808080' ).render    
       end
+    end
+    
+    it 'should alias #to_s to render' do
+      Color.new(:black, :alpha => 0.5).to_s.should == Color.new(:black, :alpha => 0.5).render
     end
   end
 end

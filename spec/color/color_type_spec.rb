@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 ColorType = StyleTrain::ColorType unless defined?( ColorType ) 
 HexColor = StyleTrain::HexColor unless defined?( HexColor )
@@ -219,8 +219,8 @@ describe ColorType do
         end
         
         it 'should compare with the delagate of a color' do
-          (@hex =~ Color.new('#000')).should == true
-          (@hex =~ Color.new('#fff')).should == false
+          (@hex =~ StyleTrain::Color.new('#000')).should == true
+          (@hex =~ StyleTrain::Color.new('#fff')).should == false
         end 
       end
       
@@ -366,4 +366,5 @@ describe ColorType do
       # todo: do color specs first, to work out where the blending of background should happen
     end
   end
+
 end  

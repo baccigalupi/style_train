@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 KeywordColor = StyleTrain::KeywordColor unless defined?( KeywordColor )
 
@@ -23,7 +23,7 @@ describe KeywordColor do
   describe 'initialization' do
     describe 'from a color' do  
       it 'should find a keyword if it maps' do
-        rgb = RGBcolor.new(:color => [255,255,224]) 
+        rgb = StyleTrain::RGBcolor.new(:color => [255,255,224]) 
         light_yellow = KeywordColor.new( rgb )
         light_yellow.r.should == 255
         light_yellow.g.should == 255
@@ -31,7 +31,7 @@ describe KeywordColor do
       end 
       
       it 'should raise an error if it does not map' do
-        rgb = RGBcolor.new(:color => [255,255,220]) 
+        rgb = StyleTrain::RGBcolor.new(:color => [255,255,220]) 
         lambda{ KeywordColor.new( rgb ) }.should raise_error( KeywordColor::KeywordError )
       end   
     end

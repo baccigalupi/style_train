@@ -121,7 +121,7 @@ end
 
 module Moduley
   def self.talk
-    'I am a class'
+    'I am a module'
   end
 end
 
@@ -138,6 +138,7 @@ end
 class MyFlexibleClass < FlexibleClass
   include Classy
 end
+
 # this will puts out 'I am a class and am being included', it won't currently add any methods though     
 
  

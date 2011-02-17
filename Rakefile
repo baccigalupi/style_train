@@ -1,16 +1,11 @@
 require 'rubygems'
 require 'rake'
 
-require 'spec/rake/spectask'
-Spec::Rake::SpecTask.new(:spec) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/**/*_spec.rb']
-end
+require 'rspec'
+require 'rspec/core/rake_task'
 
-Spec::Rake::SpecTask.new(:rcov) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.pattern = 'spec/**/*_spec.rb'
-  spec.rcov = true
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = 'spec/**/*_spec.rb'
 end
 
 task :default => :spec   
@@ -19,8 +14,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "style_train"
-    gem.summary = %Q{style_train helps CSS with Ruby color classes}
-    gem.description = %Q{style_train helps CSS with Ruby color classes}
+    gem.summary = %Q{style_train builds CSS with Ruby}
+    gem.description = %Q{style_train builds CSS using pure Ruby, not a DSL interpreted via Ruby. This allows inheritance, modules, instance level calculations and all the goodness Ruby can offer.}
     gem.email = "baccigalupi@gmail.com"
     gem.homepage = "http://github.com/baccigalupi/style_train"
     gem.authors = ["Kane Baccigalupi"]
