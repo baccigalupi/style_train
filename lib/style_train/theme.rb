@@ -1,6 +1,6 @@
 module StyleTrain
   class Theme
-    attr_accessor :value_hash 
+    attr_accessor :value_hash, :name 
     
     def self.required_keys *args
       if args.empty?
@@ -19,6 +19,7 @@ module StyleTrain
       missing_keys = self.class.required_keys - value_hash.keys
       raise ArgumentError, "Required keys not provided: #{missing_keys.map{|k| k.inspect}.join(", ")}" if !missing_keys.empty?
       self.value_hash = Gnash.new(value_hash)
+      self.name = name
       self.class.themes[name] = self
     end
     

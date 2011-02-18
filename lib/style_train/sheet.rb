@@ -236,9 +236,13 @@ module StyleTrain
     end
     
     def export opts={}
-      file_name = opts[:file_name] || self.class.to_s.underscore
+      name = file_name(opts[:file_name]) 
       render opts[:render_method] || :content
       File.open("#{StyleTrain.dir}/#{file_name}.css", 'w'){ |f| f.write(output) }
+    end
+    
+    def file_name name=nil
+      name || self.class.to_s.underscore
     end
   end
 end

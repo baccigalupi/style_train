@@ -21,4 +21,5 @@ require "style_train/color"
 
 # Big Picture Stuff, sheets, themes, etc
 require "style_train/sheet"
-require 'style_train/theme'   
+require 'style_train/theme'
+require 'style_train/themed_sheet'   
