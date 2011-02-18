@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{style_train}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kane Baccigalupi"]
@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     "lib/style_train/support/gnash.rb",
     "lib/style_train/support/numbers.rb",
     "lib/style_train/theme.rb",
+    "lib/style_train/themed_sheet.rb",
     "spec/color/color_spec.rb",
     "spec/color/color_type_spec.rb",
     "spec/color/hex_color_spec.rb",
@@ -43,6 +44,7 @@ Gem::Specification.new do |s|
     "spec/spec_helper.rb",
     "spec/style_train_spec.rb",
     "spec/theme_spec.rb",
+    "spec/themed_sheet_spec.rb",
     "style_train.gemspec",
     "utils/alexch_color_gist/color.rb",
     "utils/alexch_color_gist/color_test.rb",
@@ -63,7 +65,8 @@ Gem::Specification.new do |s|
     "spec/sheet_spec.rb",
     "spec/spec_helper.rb",
     "spec/style_train_spec.rb",
-    "spec/theme_spec.rb"
+    "spec/theme_spec.rb",
+    "spec/themed_sheet_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -71,12 +74,12 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<active_support>, [">= 3.0.0"])
+      s.add_runtime_dependency(%q<activesupport>, [">= 3.0.0"])
     else
-      s.add_dependency(%q<active_support>, [">= 3.0.0"])
+      s.add_dependency(%q<activesupport>, [">= 3.0.0"])
     end
   else
-    s.add_dependency(%q<active_support>, [">= 3.0.0"])
+    s.add_dependency(%q<activesupport>, [">= 3.0.0"])
   end
 end
 
