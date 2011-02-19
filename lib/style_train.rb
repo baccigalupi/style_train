@@ -1,7 +1,11 @@
 $LOAD_PATH.unshift( File.dirname(__FILE__) )
 
 # Support stuff
-require 'active_support/inflector'
+begin
+  require 'active_support/inflector'
+rescue
+  require 'activesupport'
+end
 require 'style_train/support/gnash'
 require 'style_train/support/numbers'
 

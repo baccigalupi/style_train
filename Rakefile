@@ -19,7 +19,7 @@ begin
     gem.email = "baccigalupi@gmail.com"
     gem.homepage = "http://github.com/baccigalupi/style_train"
     gem.authors = ["Kane Baccigalupi"]
-    gem.add_dependency('activesupport', '>= 3.0.0')
+    gem.add_dependency('activesupport')
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
