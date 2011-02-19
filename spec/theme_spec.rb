@@ -52,6 +52,20 @@ describe Theme do
     end
   end
   
+  describe 'class helpers' do
+    before :all do
+      @theme = MyTheme.new(:pink, :foo => 'pink', :bar => 'white')
+    end
+    
+    it 'returns can access themes via []' do
+      MyTheme[:pink].should == @theme
+    end
+    
+    it 'has theme keys' do
+      MyTheme.keys.should include :pink
+    end
+  end
+  
   describe 'usage' do
     before :all do
       @theme = MyTheme.new(:blue, :foo => 'blue', :bar => 'white', :extra => 'lightyellow')

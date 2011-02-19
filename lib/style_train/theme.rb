@@ -14,6 +14,14 @@ module StyleTrain
       @themes ||= Gnash.new
     end
     
+    def self.[](key)
+      themes[key]
+    end
+    
+    def self.keys
+      themes.keys.map{|k| k.to_sym}
+    end
+    
     def initialize(name, value_hash)
       raise ArgumentError, "Unique name is required as first argument" if !name || self.class.themes[name]
       missing_keys = self.class.required_keys - value_hash.keys

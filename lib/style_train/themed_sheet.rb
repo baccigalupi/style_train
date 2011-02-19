@@ -13,16 +13,16 @@ module StyleTrain
     end
     
     def theme
-      @theme || self.class.themes.themes[:default] || raise( "No theme has been set" )
+      @theme || self.class.themes[:default] || raise( "No theme has been set" )
     end
     
     def theme=(key)
-      (@theme = self.class.themes.themes[key]) || raise( ArgumentError, "Theme #{key.inspect} not found in #{self.class.themes}")
+      (@theme = self.class.themes[key]) || raise( ArgumentError, "Theme #{key.inspect} not found in #{self.class.themes}")
     end
     
     def self.export
       sheet = new
-      themes.themes.keys.each do |key|
+      themes.keys.each do |key|
         sheet.theme = key
         sheet.export
       end
