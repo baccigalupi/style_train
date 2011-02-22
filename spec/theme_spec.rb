@@ -4,16 +4,42 @@ Theme = StyleTrain::Theme unless defined?( Theme )
 
 describe Theme do
   class MyTheme < Theme
-    required_keys :foo, :bar
+    required_keys :foo, :bar, :zardoz
+    defaults :zardoz => 'sexy'
   end
   
-  describe 'Theme.required_keys' do
-    it 'stores the values' do
-      MyTheme.instance_eval('@required_keys').should == [:foo, :bar]
+  describe 'requiring keys' do
+    describe '#require_keys' do
+      it 'stores the values' do
+        MyTheme.instance_eval('@required_keys').should == [:foo, :bar, :zardoz]
+      end
+    
+      it 'retreives the keys when no argument is supplied' do
+        MyTheme.required_keys.should == [:foo, :bar, :zardoz]
+      end
     end
     
-    it 'retreives the keys when no argument is supplied' do
-      MyTheme.required_keys.should == [:foo, :bar]
+    describe '#defaults' do
+      before :all do
+        @theme = MyTheme.new(:orange_red, :foo => 'orange', :bar => 'white')
+      end
+      
+      it 'store the values' do
+        MyTheme.instance_eval('@defaults').should == Gnash.new(:zardoz => 'sexy')
+      end
+      
+      it 'retrieves the hash when called without an argument' do
+        MyTheme.defaults.should == Gnash.new(:zardoz => 'sexy')
+      end
+      
+      it 'adds defaults to the value hash' do
+        @theme[:zardoz].should == 'sexy'
+      end
+      
+      it 'does not override values with the same key' do
+        theme = MyTheme.new(:red_orange, :foo => 'red', :bar => 'white', :zardoz => 'not all that')
+        theme[:zardoz].should == 'not all that'
+      end
     end
   end
   
@@ -48,7 +74,21 @@ describe Theme do
     
     it 'sets the value hash to value_hash accessor' do
       theme = MyTheme.new(:maroon, :foo => 'maroon', :bar => 'white')
-      theme.value_hash.should == Gnash.new({:foo => 'maroon', :bar => 'white'})
+      theme.value_hash.should == Gnash.new({:foo => 'maroon', :bar => 'white', :zardoz => 'sexy'})
+    end
+    
+    describe 'with palette' do
+      before :all do
+        @theme = MyTheme.new(:substitutor, {:foo => :blue, :bar => :white}, {:blue => 'true blue', :white => 'off sometimes'})
+      end
+      
+      it "will save the pallete when it finds that argument" do
+        @theme.palette.should == {:blue => 'true blue', :white => 'off sometimes'}
+      end
+      
+      it 'will substitue symbols for pallete values with the same key' do
+        @theme.value_hash.should == Gnash.new({:foo => 'true blue', :bar => 'off sometimes', :zardoz => 'sexy'})
+      end
     end
   end
   

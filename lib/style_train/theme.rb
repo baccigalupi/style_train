@@ -1,6 +1,6 @@
 module StyleTrain
   class Theme
-    attr_accessor :value_hash, :name 
+    attr_accessor :value_hash, :name, :palette 
     
     def self.required_keys *args
       if args.empty?
@@ -14,6 +14,14 @@ module StyleTrain
       @themes ||= Gnash.new
     end
     
+    def self.defaults hash=nil
+      if hash
+        @defaults = Gnash.new(hash)
+      else
+        @defaults || Gnash.new
+      end
+    end
+    
     def self.[](key)
       themes[key]
     end
@@ -22,13 +30,21 @@ module StyleTrain
       themes.keys.map{|k| k.to_sym}
     end
     
-    def initialize(name, value_hash)
+    def initialize(name, value_hash, palette = {})
       raise ArgumentError, "Unique name is required as first argument" if !name || self.class.themes[name]
-      missing_keys = self.class.required_keys - value_hash.keys
+      self.palette = palette
+      self.value_hash = Gnash.new(self.class.defaults.merge(substitute(value_hash)))
+      missing_keys = self.class.required_keys - self.value_hash.keys.map{|k| k.to_sym}
       raise ArgumentError, "Required keys not provided: #{missing_keys.map{|k| k.inspect}.join(", ")}" if !missing_keys.empty?
-      self.value_hash = Gnash.new(value_hash)
       self.name = name
       self.class.themes[name] = self
+    end
+    
+    def substitute hash
+      hash.each do |key, value|
+        hash[key] = palette[value] if palette[value]
+      end
+      hash
     end
     
     def [](key)
