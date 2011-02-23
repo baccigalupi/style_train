@@ -61,7 +61,9 @@ module StyleTrain
     
     def property( label, value )
       value = value.join(' ') if value.is_a?(Array)
-      self.output << "\n#{indent}#{label}: #{value};"
+      str = "\n#{indent}#{label}: #{value};"
+      self.output << str
+      str
     end
     
     def background( opts )
@@ -222,6 +224,107 @@ module StyleTrain
       RUBY
     end
     
+    def corners(opts)
+      str = ""
+      if opts.is_a?(Hash)
+        if opts[:left]
+          str << corner_top_left( opts[:left] )
+          str << corner_bottom_left( opts[:left] )
+        end
+        
+        if opts[:right]
+          str << corner_top_right( opts[:right] )
+          str << corner_bottom_right( opts[:right] )
+        end
+        
+        if opts[:top]
+          str << corner_top_right( opts[:top] )
+          str << corner_top_left( opts[:top] )
+        end
+        
+        if opts[:bottom]
+          str << corner_bottom_right( opts[:bottom] )
+          str << corner_bottom_left( opts[:bottom] )
+        end
+        
+        str << corner_top_left( opts[:top_left] )         if opts[:top_left]
+        str << corner_top_right( opts[:top_right] )       if opts[:top_right]
+        str << corner_bottom_left( opts[:bottom_left] )   if opts[:bottom_left]
+        str << corner_bottom_right( opts[:bottom_right] ) if opts[:bottom_right]
+      else
+        str << property('border-radius', opts )
+        str << property('-moz-border-radius', opts)
+        str << property('-webkit-border-radius', opts)
+      end
+      str
+    end
+    
+    def corner_top_left size
+      str = ""
+      str << property('border-top-left-radius', size)
+      str << property('-moz-border-radius-topleft', size)
+      str << property('-webkit-border-top-left-radius', size)
+      str
+    end
+    
+    def corner_bottom_left size
+      str = ""
+      str << property('border-bottom-left-radius', size)
+      str << property('-moz-border-radius-bottomleft', size)
+      str << property('-webkit-border-bottom-left-radius', size)
+      str
+    end
+    
+    def corner_top_right size
+      str = ""
+      str << property('border-top-right-radius', size)
+      str << property('-moz-border-radius-topright', size)
+      str << property('-webkit-border-top-right-radius', size)
+      str
+    end
+    
+    def corner_bottom_right size
+      str = ""
+      str << property('border-bottom-right-radius', size)
+      str << property('-moz-border-radius-bottomright', size)
+      str << property('-webkit-border-bottom-right-radius', size)
+      str
+    end
+    
+    def shadow(opts={})
+      opts[:horizontal_offset] ||= default_shadow_offset
+      opts[:vertical_offset] ||= default_shadow_offset
+      opts[:blur] ||= default_shadow_offset
+      opts[:color] ||= default_shadow_color
+      str = ""
+      str << property('box-shadow', shadow_options(opts))
+      str << property('-webkit-box-shadow', shadow_options(opts))
+      str << property('-moz-box-shadow', shadow_options(opts))
+      str
+    end
+    
+    def default_shadow_offset
+      0.25.em # this can be overwritten on a class by class basis
+    end
+    
+    def default_shadow_color
+      :black # this too
+    end
+    
+    def shadow_options(opts)
+      "#{opts[:inner] ? 'inset ' : ''}#{opts[:horizontal_offset]} #{opts[:vertical_offset]} #{opts[:blur]} #{opts[:color]}"
+    end
+    
+    def gradient(opts={})
+      raise ArgumentError, "gradient styles require a :start and :end color" unless opts[:start] && opts[:end]
+      opts[:from] ||= 'top'
+      direction = opts[:from] == 'top' ? "left top, left bottom" : "left top, right top" 
+      str = ""
+      str << property('background', opts[:end])
+      str << property('background', "-webkit-gradient(linear, #{direction}, from(#{opts[:start]}), to(#{opts[:end]}))")
+      str << property('background', "-moz-linear-gradient(#{opts[:from]},  #{opts[:start]},  #{opts[:end]})")
+      str
+    end
     
     def content
       # override me in subclasses

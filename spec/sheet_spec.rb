@@ -514,6 +514,180 @@ describe Sheet do
       end
     end
   end
+  
+  describe 'css 3 goodies' do
+    before :all do
+      @sheet = Sheet.new
+    end
+    
+    describe '#corners' do
+      it 'makes all corners the specified roundness' do
+        str = @sheet.corners(32.px)
+        str.should include "border-radius: 32px"
+        str.should include "-moz-border-radius: 32px"
+        str.should include "-webkit-border-radius: 32px"
+      end
+      
+      it '#corner_top_left make the correct three declarations' do
+        str = @sheet.corner_top_left(1.em)
+        str.should include( 
+          "border-top-left-radius: 1em", 
+          "-moz-border-radius-topleft: 1em", 
+          "-webkit-border-top-left-radius: 1em"
+        )  
+      end
+      
+      it '#corners makes a top left corner' do
+        @sheet.corners(:top_left => 2.em).should == @sheet.corner_top_left(2.em)
+      end
+      
+      it '#corner_top_right make the correct three declarations' do
+        str = @sheet.corner_top_right(1.5.em)
+        str.should include( 
+          "border-top-right-radius: 1.5em", 
+          "-moz-border-radius-topright: 1.5em", 
+          "-webkit-border-top-right-radius: 1.5em"
+        )  
+      end
+      
+      it '#corners makes a top left corner' do
+        @sheet.corners(:top_right => 1.em).should == @sheet.corner_top_right(1.em)
+      end
+      
+      
+      it '#corner_bottom_right make the correct three declarations' do
+        str = @sheet.corner_bottom_right(1.5.em)
+        str.should include( 
+          "border-bottom-right-radius: 1.5em", 
+          "-moz-border-radius-bottomright: 1.5em", 
+          "-webkit-border-bottom-right-radius: 1.5em"
+        )  
+      end
+      
+      it '#corners makes a top right corner' do
+        @sheet.corners(:bottom_right => 1.em).should == @sheet.corner_bottom_right(1.em)
+      end
+      
+      it '#corner_bottom_left make the correct three declarations' do
+        str = @sheet.corner_bottom_left(1.5.em)
+        str.should include( 
+          "border-bottom-left-radius: 1.5em", 
+          "-moz-border-radius-bottomleft: 1.5em", 
+          "-webkit-border-bottom-left-radius: 1.5em"
+        )  
+      end
+      
+      it '#corners makes a top left corner' do
+        @sheet.corners(:bottom_left => 1.em).should == @sheet.corner_bottom_left(1.em)
+      end
+      
+      it 'makes both top corners at once' do
+        str = @sheet.corners(:top => 20.px)
+        str.should include "border-top-left-radius: 20px"
+        str.should include "-moz-border-radius-topleft: 20px"
+        str.should include "-webkit-border-top-left-radius: 20px"
+        str.should include "border-top-right-radius: 20px"
+        str.should include "-moz-border-radius-topright: 20px"
+        str.should include "-webkit-border-top-right-radius: 20px"
+      end
+      
+      it 'makes both bottom corners at once' do
+        str = @sheet.corners(:bottom => 30.px)
+        str.should include "border-bottom-left-radius: 30px"
+        str.should include "-moz-border-radius-bottomleft: 30px"
+        str.should include "-webkit-border-bottom-left-radius: 30px"
+        str.should include "border-bottom-right-radius: 30px"
+        str.should include "-moz-border-radius-bottomright: 30px"
+        str.should include "-webkit-border-bottom-right-radius: 30px"
+      end
+      
+      it 'makes both left corners at once' do
+        str = @sheet.corners(:left => 10.px)
+        str.should include "border-bottom-left-radius: 10px"
+        str.should include "-moz-border-radius-bottomleft: 10px"
+        str.should include "-webkit-border-bottom-left-radius: 10px"
+        str.should include "border-top-left-radius: 10px"
+        str.should include "-moz-border-radius-topleft: 10px"
+        str.should include "-webkit-border-top-left-radius: 10px"
+        
+      end
+      
+      it 'makes both right corners at once' do
+        str = @sheet.corners(:left => 15.px)
+        str.should include "border-bottom-left-radius: 15px"
+        str.should include "-moz-border-radius-bottomleft: 15px"
+        str.should include "-webkit-border-bottom-left-radius: 15px"
+        str.should include "border-top-left-radius: 15px"
+        str.should include "-moz-border-radius-topleft: 15px"
+        str.should include "-webkit-border-top-left-radius: 15px"
+      end
+    end
+    
+    describe '#shadow' do
+      it 'build declarations for all three browser types' do
+        str = @sheet.shadow
+        str.should match(/^box-shadow/)
+        str.should include '-webkit-box-shadow'
+        str.should include '-moz-box-shadow'
+      end
+      
+      it 'has good defaults' do
+        @sheet.shadow.should include "0.25em 0.25em 0.25em black"
+      end
+      
+      it 'uses the color when provided' do
+        str = @sheet.shadow(:color => '#666')
+        str.should include '#666'
+        str.should_not include 'black'
+      end
+      
+      it 'uses the horizontal offset when provided' do
+        @sheet.shadow(:horizontal_offset => 20.px).should include "20px 0.25em 0.25em black"
+      end
+      
+      it 'uses the vertical offset when provided' do
+        @sheet.shadow(:vertical_offset => 10.px).should include "0.25em 10px 0.25em black"
+      end
+      
+      it 'uses the blur when provided' do
+        @sheet.shadow(:blur => 15.px).should include "0.25em 0.25em 15px black"
+      end
+      
+      it 'will make an inner shadow' do
+        @sheet.shadow(:inner => true).should include "inset 0.25em 0.25em 0.25em black"
+      end
+    end
+    
+    describe 'gradient' do
+      it 'requires a start and end color' do
+        lambda{ @sheet.gradient }.should raise_error(ArgumentError, "gradient styles require a :start and :end color")
+      end
+      
+      it 'builds the necessary declarations' do
+        @sheet.gradient(:start => :white, :end => :black).should include(
+          "background: black",
+          "background: -webkit-gradient",
+          "background: -moz-linear-gradient"
+        )
+      end
+      
+      describe 'direction' do
+        it 'defaults from top to bottom' do
+          @sheet.gradient(:start => :white, :end => :black).should include( 
+            "linear, left top, left bottom", 
+            "linear-gradient(top"
+          )
+        end
+        
+        it 'makes from left to right' do
+          @sheet.gradient(:start => :white, :end => :black, :from => :left).should include(
+            "linear, left top, right top",
+            "linear-gradient(left" 
+          )
+        end
+      end
+    end
+  end
 
   class StyleSheet < StyleTrain::Sheet
     def content
