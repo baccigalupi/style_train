@@ -87,12 +87,13 @@ module StyleTrain
     end 
   
     # blending
-    def mix( color )
+    def mix( color, mix_ratio=0.5 )
+      mix_ratio = 1-mix_ratio
       mixed = self.dup
-      mixed.r = self.class.average(self.r, color.r)
-      mixed.g = self.class.average(self.g, color.g)
-      mixed.b = self.class.average(self.b, color.b)
-      mixed.alpha = self.class.average(self.alpha, color.alpha, false)
+      mixed.r = ratio(self.r, color.r, mix_ratio)
+      mixed.g = ratio(self.g, color.g, mix_ratio)
+      mixed.b = ratio(self.b, color.b, mix_ratio)
+      mixed.alpha = ratio(self.alpha, color.alpha, mix_ratio, false)
       mixed.build
       mixed
     end
@@ -109,13 +110,27 @@ module StyleTrain
     end
   
     def self.blend(first, second, ratio) 
-      blended = (first*ratio + second*(1-ratio)).round
+      ratio(first, second, ratio)
     end    
   
     def self.average(first, second, round=true)
-      averaged = ((first + second)/2.0)
-      round ? averaged.round : averaged
+      ratio(first, second, round)
+    end
+    
+    def self.ratio(first, second, first_ratio=0.5, round=true)
+      second_ratio = 1-first_ratio
+      value = first*first_ratio + second*second_ratio
+      round ? value.round : value 
+    end
+    
+    def ratio *args
+      self.class.ratio *args
     end 
+  
+    def average *args
+      self.class.average *args
+    end 
+    
   
     def self.blend_alphas(first, second)
       base, blender = first > second ? [first, second] : [second, first]

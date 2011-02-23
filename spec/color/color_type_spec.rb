@@ -271,7 +271,7 @@ describe ColorType do
         @hex = HexColor.new(:color => '#666') 
       end
       
-      describe 'averaging' do
+      describe 'averaging (getting a midway point)' do
         it 'should average the r, g, and b values' do
           color = @rgb.mix(@hex)
           color.r.should == ((102+20)/2.0).round
@@ -358,8 +358,27 @@ describe ColorType do
         end 
       end  
       
-      describe 'stepping'
-      
+      describe 'blending a ratio of one color to the other' do
+        it 'should mix in the correct percentage r, g, and b values' do
+          color = @rgb.mix(@hex, 0.25) # only 25% of the @hex
+          color.r.should == (102*0.25 + 20*0.75).round
+          color.g.should == (102*0.25 + 40*0.75).round
+          color.b.should == (102*0.25 + 60*0.75).round
+        end 
+        
+        it 'should average the alpha' do
+          color = @rgb.mix(@hex, 0.25)
+          color.alpha.should == 0.5*0.75 + 1*0.25
+        end
+        
+        it 'should return the original color type' do 
+          color = @rgb.mix(@hex, 0.25)
+          color.class.should == RGBcolor
+          
+          color = @hex.mix(@rgb, 0.25)
+          color.class.should == HexColor
+        end
+      end
     end
 
     describe 'rendering' do

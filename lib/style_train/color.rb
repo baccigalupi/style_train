@@ -82,7 +82,19 @@ module StyleTrain
     
       self.background_set = true
       @background  
-    end     
+    end
+    
+    def step(end_color, steps=10)
+      start_color = self.delegate
+      end_color = end_color.delegate
+      array = [start_color]
+      (2..(steps-1)).each do |number|
+        ratio = (steps-number)/steps.to_f
+        array << start_color.mix(end_color, ratio)
+      end
+      array << end_color
+      array
+    end    
   
     def render(render_style=nil) 
       if render_style && render_style.to_sym == :ie
