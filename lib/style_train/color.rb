@@ -89,7 +89,7 @@ module StyleTrain
       end_color = end_color.delegate
       array = [start_color]
       (2..(steps-1)).each do |number|
-        ratio = (steps-number)/steps.to_f
+        ratio = 1 - (steps-number)/steps.to_f
         array << start_color.mix(end_color, ratio)
       end
       array << end_color

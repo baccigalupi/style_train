@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{style_train}
-  s.version = "0.2.1"
+  s.version = "0.2.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kane Baccigalupi"]
-  s.date = %q{2011-02-19}
+  s.date = %q{2011-02-23}
   s.description = %q{style_train builds CSS using pure Ruby, not a DSL interpreted via Ruby. This allows inheritance, modules, instance level calculations and all the goodness Ruby can offer.}
   s.email = %q{baccigalupi@gmail.com}
   s.extra_rdoc_files = [
