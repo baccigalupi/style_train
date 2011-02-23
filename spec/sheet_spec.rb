@@ -211,6 +211,10 @@ describe Sheet do
           'border-bottom: 1px solid black', 'border-left: 1px solid black'
         )
       end
+      
+      it 'should do :none' do
+        @sheet.border(:none).should include 'border: none'
+      end
     end
     
     describe 'outline' do

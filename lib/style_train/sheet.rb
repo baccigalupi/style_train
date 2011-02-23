@@ -86,19 +86,23 @@ module StyleTrain
     end
     
     def border(opts={})
-      value = border_value(opts)
-      if only = opts[:only]
-        if only.is_a?(Array)
-          str = ""
-          only.each do |type|
-            str << property( "border-#{type}", value )
+      if opts.is_a?(Hash)
+        value = border_value(opts)
+        if only = opts[:only]
+          if only.is_a?(Array)
+            str = ""
+            only.each do |type|
+              str << property( "border-#{type}", value )
+            end
+            str
+          else
+            property "border-#{only}", value
           end
-          str
         else
-          property "border-#{only}", value
+          property "border", value
         end
       else
-        property "border", value
+        property "border", opts
       end
     end
     
