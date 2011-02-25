@@ -149,7 +149,8 @@ module StyleTrain
       str
     end
     
-    def margin(opts)
+    def margin(*opts)
+      opts = opts.size == 1 ? opts.first : opts
       if opts.is_a?(Array)
         property('margin', opts)
       else
@@ -162,7 +163,8 @@ module StyleTrain
       end
     end
     
-    def padding(opts)
+    def padding(*opts)
+      opts = opts.size == 1 ? opts.first : opts
       if opts.is_a?(Array)
         property('padding', opts)
       else

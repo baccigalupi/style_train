@@ -414,6 +414,10 @@ describe Sheet do
         @sheet.margin( [10.px, 20.px, 13.px] ).should include 'margin: 10px 20px 13px'
       end
       
+      it 'takes an arguments as an array' do
+        @sheet.margin( 15.px, 20.px ).should include 'margin: 15px 20px'
+      end
+      
       it 'takes :left and just makes that declaration' do
         @sheet.margin( :left => 30.px ).should include 'margin-left: 30px'
       end
@@ -434,6 +438,10 @@ describe Sheet do
     describe 'padding' do
       it 'takes an array' do
         @sheet.padding( [10.px, 20.px, 13.px] ).should include 'padding: 10px 20px 13px'
+      end
+      
+      it 'takes an arguments as an array' do
+        @sheet.padding( 15.px, 20.px ).should include 'padding: 15px 20px'
       end
       
       it 'takes :left and just makes that declaration' do
