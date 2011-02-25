@@ -22,4 +22,8 @@ describe Float do
   it '#em converts to a string with em at the end' do
     1.5.em.should == '1.5em'
   end
+  
+  it '#pt converts to a string with % at the end' do
+    12.5.pt.should == '12.5pt'
+  end
 end
