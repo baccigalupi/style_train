@@ -130,7 +130,9 @@ CSS
     
     def text(opts)
       str = ""
-      str << property('font-family', opts[:font]) if opts[:font]
+      if family = opts[:font] || opts[:family]
+        str << property('font-family', family)
+      end
       str << property('font-weight', opts[:weight]) if opts[:weight]
       str << property('font-variant', opts[:variant]) if opts[:variant]
       str << property('font-style', opts[:style]) if opts[:style]
@@ -138,7 +140,9 @@ CSS
       str << property('color', opts[:color]) if opts[:color]
       str << property('text-direction', opts[:direction]) if opts[:direction]
       str << property('letter-spacing', opts[:spacing]) if opts[:spacing]
-      str << property('line-height', opts[:line_height]) if opts[:line_height]
+      if height = opts[:line_height] || opts[:height]
+        str << property('line-height', height)
+      end
       str << property('text-align', opts[:align]) if opts[:align]
       str << property('text-decoration', opts[:decoration]) if opts[:decoration]
       str << property('text-indent', opts[:indent]) if opts[:indent]
@@ -148,6 +152,8 @@ CSS
       str << property('word-spacing', opts[:word_spacing]) if opts[:word_spacing]
       str
     end
+    
+    alias :font :text
     
     def list(opts)
       str = ""

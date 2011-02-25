@@ -390,6 +390,10 @@ CSS
         @sheet.text(:line_height => 2).should include 'line-height: 2'
       end
       
+      it 'uses alt syntax for line height' do
+        @sheet.text(:height => 2).should include 'line-height: 2'
+      end
+      
       it 'aligns' do
         @sheet.text(:align => :center).should include 'text-align: center'
       end
@@ -416,6 +420,14 @@ CSS
       
       it 'specifies word spacing' do
         @sheet.text(:word_spacing => 25.px).should include 'word-spacing: 25px'
+      end
+      
+      it 'aliases to #font' do
+        @sheet.font(:word_spacing => 15.px).should include 'word-spacing: 15px'
+      end
+      
+      it 'uses the :family option as well as the :font to specify font face' do
+        @sheet.font(:family => 'Serif').should include 'font-family: Serif'
       end
     end
     
