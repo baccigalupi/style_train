@@ -181,6 +181,10 @@ describe Sheet do
         @sheet.background(:repeat => :x).should include "background-repeat: repeat-x;"
       end
       
+      it ':repeat with :none will make a no-repeat value' do
+        @sheet.background(:repeat => :none).should include 'background-repeat: no-repeat'
+      end
+      
       it 'will create a background-color property if it receives a string that converts to a color' 
       it 'will create a background-color property if it receives a color'
     end
@@ -516,6 +520,10 @@ describe Sheet do
       it 'visibility' do
         @sheet.visibility(:hidden).should include 'visibility: hidden'
       end
+      
+      it 'opacity' do
+        @sheet.opacity(0.5).should include 'opacity: 0.5'
+      end
     end
   end
   
@@ -752,5 +760,28 @@ CSS
       StyleSheet.new.export(:file_name => 'foo')
       File.exists?(@dir + 'foo')
     end
+  end
+  
+  describe 'alternative syntax' do
+    # Available operators for overloading 
+    # |, ^, &, <=>, ==, ===, =~, >, >=, <, <=, +, -, *, /, %, **, <<, >>, ~, +@, -@, [], []= (2 args)
+    
+    # input[:readonly]{ ... }
+    # input['type=text']{ ... }
+    # div :input { ... }
+    
+    
+    # how to handle :hover and other psuedo selectors
+    
+    # o :create_button {
+    #   
+      # o :hover {
+      #   
+      # }
+      
+      # < :active {
+      #   
+      # }
+    # }
   end
 end

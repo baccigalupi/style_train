@@ -80,6 +80,8 @@ module StyleTrain
       value = value.to_sym
       if value == :x || value == :y
         "repeat-#{value}"
+      elsif value == :none
+        'no-repeat'
       else
         value
       end
@@ -218,7 +220,7 @@ module StyleTrain
     end
     
     [
-      'color', 'display', 'float', 'clear', 'visibility', 'cursor',
+      'color', 'display', 'float', 'clear', 'visibility', 'cursor', 'opacity',
       'height', 'width', 'max_height', 'max_width', 'min_height', 'min_width' 
     ].each do |meth|
       class_eval <<-RUBY
