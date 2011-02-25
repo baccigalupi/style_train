@@ -166,7 +166,7 @@ describe Sheet do
       end
       
       it ':image will create a background-image property' do
-        @sheet.background(:image => "url('ok.png')").should include "background-image: url('ok.png');"
+        @sheet.background(:image => "ok.png").should include "background-image: url('ok.png');"
       end
       
       it ':position will create a background-position property' do

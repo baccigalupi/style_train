@@ -69,7 +69,7 @@ module StyleTrain
     def background( opts )
       str = ""
       str << property('background-color', Color.new(opts[:color])) if opts[:color]
-      str << property('background-image', opts[:image]) if opts[:image]
+      str << property('background-image', "url('#{opts[:image]}')") if opts[:image]
       str << property('background-position', opts[:position]) if opts[:position]
       str << property('background-attachment', opts[:attachment]) if opts[:attachment]
       str << property('background-repeat', background_repeat_value(opts[:repeat])) if opts[:repeat]
