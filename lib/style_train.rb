@@ -24,6 +24,7 @@ require 'style_train/color_types/hex_color'
 require "style_train/color"
 
 # Big Picture Stuff, sheets, themes, etc
+require 'style_train/style'
 require "style_train/sheet"
 require 'style_train/theme'
 require 'style_train/themed_sheet'   

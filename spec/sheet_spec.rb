@@ -14,6 +14,10 @@ describe Sheet do
         background :color => :white
         margin [1.em, :auto]
       }
+      
+      style(:foo){
+        color :red
+      }
     end
   end
   
@@ -28,12 +32,16 @@ describe Sheet do
       @sheet.output.should == 'foo'
     end
     
-    it 'output gets set to an empty string on initialize' do
-      Sheet.new.output.should == ''
+    it 'output gets set to an empty array on initialize' do
+      Sheet.new.output.should == []
     end
     
-    it 'should have an indent_level that is initialized to 0' do
-      Sheet.new.indent_level.should == 0
+    it 'should have contexts' do
+      Sheet.new.contexts.should == []
+    end
+    
+    it 'should have an indent level that is initialized to 0' do
+      Sheet.new.level.should == 0
     end
   end
   
@@ -52,7 +60,7 @@ CSS
     
     it 'resets the output' do
       @sheet.stub(:header).and_return('HEADER')
-      @sheet.should_receive(:output=).with('HEADER')
+      @sheet.should_receive(:output=).with(['HEADER'])
       @sheet.render
     end
     
@@ -67,11 +75,18 @@ CSS
       @sheet.render :foo
     end
     
-    it 'returns the output' do
-      @sheet.output = "bar"
+    it 'returns the output joined by 2 line ends' do
+      @sheet.output = ["bar", "baz"]
       @sheet.stub(:output=)
-      @sheet.stub(:content).and_return('foo')
-      @sheet.render.should == "bar"
+      @sheet.stub(:content)
+      @sheet.render.should == "bar\n\nbaz"
+    end
+    
+    it 'joins with one line break when a render type is specified' do
+      @sheet.output = ['bar', 'baz']
+      @sheet.stub!(:output=)
+      @sheet.stub!(:content)
+      @sheet.render(:content, :type => :linear).should == "bar\nbaz"
     end
   end
   
@@ -80,37 +95,31 @@ CSS
       @sheet = Sheet.new
     end
     
-    it 'adds an entry to the output' do
-      @sheet.output.should == ""
+    it 'adds an Style object to the output' do
+      @sheet.output.size.should == 0
       @sheet.style(:foo)
-      @sheet.output.should_not == ""
+      @sheet.output.size.should == 1
+      @sheet.output.first.class.should == StyleTrain::Style
     end
     
-    it 'renders the right style when passed a string' do
-      @sheet.style('.foo')
-      @sheet.output.should include '.foo'
-    end
+    describe 'Style object selector' do
+      it 'is correct when passed a string' do
+        @sheet.style('.foo')
+        style = @sheet.output.first
+        style.should_not be_nil
+        style.selectors.should == ['.foo']
+        style.render.should include '.foo'
+      end
     
-    it 'renders the right selecter when passed a non-tag symbol' do
-      @sheet.style(:bar)
-      @sheet.output.should include '.bar'
-    end
+      it 'is correct when passed a non-tag symbol' do
+        @sheet.style(:bar)
+        @sheet.output.first.selectors.should == ['.bar']
+      end
     
-    it 'renders the right style when passed a tag symbol' do
-      @sheet.style(:body)
-      @sheet.output.should include 'body'
-      @sheet.output.should_not include '.body'
-    end
-    
-    it 'renders {} when not passed a block' do
-      @sheet.style(:body)
-      @sheet.output.should include "body {\n}"
-    end
-    
-    describe 'receiving a block' do
-    end
-    
-    describe 'nesting' do
+      it 'is correct when passed a tag symbol' do
+        @sheet.style(:body)
+        @sheet.output.first.selectors.should == ['body']
+      end
     end
   end
   
@@ -126,37 +135,26 @@ CSS
       
       it "should add a style for '#{tag}'" do
         @sheet.send(tag)
-        @sheet.output.should include "#{tag} {\n}"
+        @sheet.output.first.render.should include "#{tag} {\n}"
       end
-    end
-    
-    it 'should pass the block on to the style method' do
-      str = @sheet.instance_eval <<-RUBY
-        body do
-          margin [2.em, :auto]
-        end
-      RUBY
-      str.should include 'margin: 2em auto'
     end
   end
   
   describe 'properties' do
     before :all do
       @sheet = Sheet.new
+      @style = StyleTrain::Style.new(:selectors => ['body'], :level => 2)
+      @sheet.contexts << @style
+      @sheet.output << @style
     end
     
     describe '#property' do
       before :all do
-        @sheet.indent_level = 4
         @property = @sheet.property('border', '1px solid #ccc' )
       end
       
       it 'returns a string' do
         @property.is_a?(String).should be_true
-      end
-      
-      it 'adds a line break and an indent to the front of the string' do
-        @property.match(/^\W{5}/).should_not be_nil
       end
       
       it 'includes the property name' do
@@ -172,11 +170,11 @@ CSS
       end
       
       it 'puts it all together correctly' do
-        @property.should == "\n    border: 1px solid #ccc;"
+        @property.should == "border: 1px solid #ccc;"
       end
       
-      it 'adds the string to the output' do
-        @sheet.output.should include @property
+      it 'adds the string the style object' do
+        @sheet.output.map{|e| e.render }.join(' ').should include @property
       end
       
       it 'converts an array to a space separated string' do
@@ -583,6 +581,9 @@ CSS
   describe 'css 3 goodies' do
     before :all do
       @sheet = Sheet.new
+      @style = StyleTrain::Style.new(:selectors => ['body'], :level => 2)
+      @sheet.contexts << @style
+      @sheet.output << @style
     end
     
     describe '#corners' do
@@ -757,8 +758,7 @@ CSS
   describe 'subclassing' do
     it 'works' do
       StyleSheet.render.should include( 
-<<-CSS
-body {
+"body {
   background-color: #666;
   font-family: verdana;
 }
@@ -767,7 +767,10 @@ body {
   background-color: white;
   margin: 1em auto;
 }
-CSS
+
+.foo {
+  color: red;
+}"
       )
     end
   end
@@ -801,26 +804,113 @@ CSS
     end
   end
   
-  describe 'alternative syntax' do
-    # Available operators for overloading 
-    # |, ^, &, <=>, ==, ===, =~, >, >=, <, <=, +, -, *, /, %, **, <<, >>, ~, +@, -@, [], []= (2 args)
+  describe 'expanded syntax' do
+    class Expanded < Sheet
+      def content
+        c( :abridged_syntax )
+        
+        c( :first, :second, :third ) {
+          background :color => :black
+        }
+        
+        div( :next, :again ){
+          color :red
+        }
+      end
+    end
+    
+    before :all do
+      @sheet = Expanded.new
+    end
+    
+    it 'aliases #style to #s' do
+      @sheet.render.should match /^\.abridged_syntax/
+    end
+    
+    it 'assigns multiple arguments to comma separated' do
+      @sheet.render.should include <<-CSS
+.first,
+.second,
+.third {
+  background-color: black;
+}
+CSS
+    end
+    
+    it 'tags take arguments too' do
+      @sheet.render.should include "
+div.next,
+div.again {
+  color: red;
+}"
+    end
+    
+    describe 'nesting' do
+      class Nested < Sheet
+        def content
+          style(:form){
+            border :color => '#666'
+            padding 1.em
+            
+            # first level nesting
+            style(:label){
+              display :block
+              width 10.em
+              
+              # second level nesting
+              style(:input){
+                color '#111'
+              }
+            }
+            
+            # property after the nesting
+            color :blue
+          }
+          
+          style(:a) {
+            text :decoration => :none
+          }
+        end
+      end
+      
+      before :all do
+        @output = Nested.render
+      end
+      
+      it 'makes a separate declaration for the first level nested style' do
+        @output.should match /^form \{$/
+        @output.should match /^\W*form label \{$/
+      end
+      
+      it 'makes a separate declaration for deeply nested styles' do
+        @output.should match /^\W*form label input \{$/ 
+      end
+      
+      it 'should indent the nested style to the right level' do
+        @output.should match /^\W{2}*form label \{$/
+        @output.should match /^\W{4}*form label \{$/
+      end
+      
+      it 'puts property declarations after a nested style in the right place' do
+        @output.should include 
+"
+form {
+  border: 1px solid #666;
+  padding: 1em;
+  color: blue;
+}
+"
+      end
+      
+      it 'makes base level declarations correctly after nesting' do
+        @output.should match /^a \{$/
+      end
+    end
     
     # input[:readonly]{ ... }
     # input['type=text']{ ... }
-    # div :input { ... }
-    
-    
     # how to handle :hover and other psuedo selectors
-    
-    # o :create_button {
-    #   
-      # o :hover {
-      #   
-      # }
-      
-      # < :active {
-      #   
-      # }
-    # }
+    # p.classy < a 
+    # #css method on objects that allows instance eval of blocks globally
   end
 end

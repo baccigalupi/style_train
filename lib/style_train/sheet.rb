@@ -1,20 +1,29 @@
 module StyleTrain
   class Sheet
-    attr_accessor :output, :indent_level
+    attr_accessor :output, :level, :contexts
     
     def initialize(opts={})
-      self.output = ''
-      self.indent_level = 0
+      self.output = []
+      self.contexts = []
+      self.level = 0
     end
     
-    def render render_method = :content
-      self.output = header
+    def render render_method = :content, opts={}
+      self.output = [header]
       if render_method == :content
         content
       else
         send render_method
       end
-      output
+      if opts[:type] 
+        render_type = opts[:type]
+        joiner = "\n"
+      else
+        render_type = :full
+        joiner = "\n\n"
+      end
+      
+      output.map{|s| s.is_a?(String) ? s : s.to_s( render_type ) }.join(joiner)
     end
     
     def header
@@ -25,52 +34,40 @@ module StyleTrain
 CSS
    end
     
-    def style(selector)
-      self.output << "\n"
-      if selector.is_a?(String) || TAGS.include?(selector)
-        self.output << "#{selector}"
-      else  
-        self.output << ".#{selector}"
-      end
-      self.output << " {"
-      if block_given?
-        self.indent_level += 2
-        yield 
-        self.indent_level -= 2
-      end
-      self.output << "\n}\n"
+    def style(*selectors)
+      s = Style.new(:selectors => selectors, :level => level, :context => context)
+      self.output << s
+      self.contexts.unshift( s )
+      yield if block_given?
+      self.contexts.shift
     end
     
-    TAGS = [
-      :a, :abbr, :acronym, :address, :area, :b, :base, :bdo, 
-      :big, :blockquote, :body, :br, :button, :caption, :center, 
-      :cite, :code, :col, :colgroup, :dd, :del, :dfn, :div, 
-      :dl, :dt, :em, :embed, :fieldset, :form, :frame, :frameset, 
-      :h1, :h2, :h3, :h4, :h5, :h6, :head, :hr, :html, :i, :iframe, 
-      :img, :input, :ins, :kbd, :label, :legend, :li, :link, 
-      :map, :meta, :noframes, :noscript, :object, :ol, :optgroup, 
-      :option, :p, :param, :pre, :q, :s, :samp, :script, :select, 
-      :small, :span, :strike, :strong, :sub, :sup, :table, 
-      :tbody, :td, :textarea, :tfoot, :th, :thead, :title, 
-      :tr, :tt, :u, :ul, :var
-    ]
+    def context
+      contexts.first
+    end
+    
+    alias :c :style
+    
+    TAGS = StyleTrain::Style::TAGS
     
     TAGS.each do |tag|
       class_eval <<-RUBY
-        def #{tag} &block
-          style( '#{tag}', &block )
+        def #{tag}(*selectors, &block)
+          if selectors.size > 0
+            selectors = selectors.map{ |e| '#{tag}' + '.' + e.to_s }
+            style( *selectors, &block )
+          else
+            style( '#{tag}', &block )
+          end  
         end
       RUBY
     end
     
-    def indent
-      " " * indent_level
-    end
     
     def property( label, value )
       value = value.join(' ') if value.is_a?(Array)
-      str = "\n#{indent}#{label}: #{value};"
-      self.output << str
+      str = "#{label}: #{value};"
+      self.context.properties << str
       str
     end
     
