@@ -23,7 +23,7 @@ module StyleTrain
         joiner = "\n\n"
       end
       
-      output.map{|s| s.is_a?(String) ? s : s.to_s( render_type ) }.join(joiner)
+      output.map{|s| s.is_a?(String) ? s : s.render( render_type ) }.join(joiner)
     end
     
     def header
@@ -38,7 +38,11 @@ CSS
       s = Style.new(:selectors => selectors, :level => level, :context => context)
       self.output << s
       self.contexts.unshift( s )
-      yield if block_given?
+      if block_given?
+        self.level += 1
+        yield
+        self.level -= 1
+      end
       self.contexts.shift
     end
     
@@ -363,8 +367,8 @@ CSS
     
     def export opts={}
       name = file_name(opts[:file_name]) 
-      render opts[:render_method] || :content
-      File.open("#{StyleTrain.dir}/#{file_name}.css", 'w'){ |f| f.write(output) }
+      str = render (opts[:render_method] || :content), opts
+      File.open("#{StyleTrain.dir}/#{file_name}.css", 'w'){ |f| f.write(str) }
     end
     
     def file_name name=nil
