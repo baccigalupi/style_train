@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{style_train}
-  s.version = "0.2.4"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kane Baccigalupi"]
-  s.date = %q{2011-02-25}
+  s.date = %q{2011-02-28}
   s.description = %q{style_train builds CSS using pure Ruby, not a DSL interpreted via Ruby. This allows inheritance, modules, instance level calculations and all the goodness Ruby can offer.}
   s.email = %q{baccigalupi@gmail.com}
   s.extra_rdoc_files = [
@@ -28,28 +28,31 @@ Gem::Specification.new do |s|
     "lib/style_train/color_types/keyword_color.rb",
     "lib/style_train/color_types/rgb_color.rb",
     "lib/style_train/sheet.rb",
+    "lib/style_train/style.rb",
     "lib/style_train/support/gnash.rb",
     "lib/style_train/support/numbers.rb",
     "lib/style_train/theme.rb",
     "lib/style_train/themed_sheet.rb",
+    "research/alexch_color_gist/color.rb",
+    "research/alexch_color_gist/color_test.rb",
+    "research/contexting.rb",
+    "research/numbers_spec.rb",
+    "research/overview.txt",
+    "research/stylesheet.txt",
     "spec/color/color_spec.rb",
     "spec/color/color_type_spec.rb",
     "spec/color/hex_color_spec.rb",
     "spec/color/keyword_color_spec.rb",
     "spec/color/rgb_color_spec.rb",
     "spec/generated_files/.gitkeep",
-    "spec/numbers_spec.rb",
     "spec/sheet_spec.rb",
     "spec/spec.opts",
     "spec/spec_helper.rb",
+    "spec/style_spec.rb",
     "spec/style_train_spec.rb",
     "spec/theme_spec.rb",
     "spec/themed_sheet_spec.rb",
-    "style_train.gemspec",
-    "utils/alexch_color_gist/color.rb",
-    "utils/alexch_color_gist/color_test.rb",
-    "utils/overview.txt",
-    "utils/stylesheet.txt"
+    "style_train.gemspec"
   ]
   s.homepage = %q{http://github.com/baccigalupi/style_train}
   s.require_paths = ["lib"]
@@ -61,9 +64,9 @@ Gem::Specification.new do |s|
     "spec/color/hex_color_spec.rb",
     "spec/color/keyword_color_spec.rb",
     "spec/color/rgb_color_spec.rb",
-    "spec/numbers_spec.rb",
     "spec/sheet_spec.rb",
     "spec/spec_helper.rb",
+    "spec/style_spec.rb",
     "spec/style_train_spec.rb",
     "spec/theme_spec.rb",
     "spec/themed_sheet_spec.rb"
