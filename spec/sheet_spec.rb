@@ -79,7 +79,7 @@ CSS
       @sheet.output = ["bar", "baz"]
       @sheet.stub(:output=)
       @sheet.stub(:content)
-      @sheet.render.should == "bar\n\nbaz"
+      @sheet.render.should == "bar\nbaz"
     end
     
     it 'joins with one line break when a render type is specified' do
@@ -135,8 +135,18 @@ CSS
       
       it "should add a style for '#{tag}'" do
         @sheet.send(tag)
-        @sheet.output.first.render.should include "#{tag} {\n}"
+        @sheet.output.first.render.should include "#{tag} {}"
       end
+    end
+    
+    it 'should correctly concatenate the selector' do
+      @sheet.div(:hover)
+      @sheet.div(:foo)
+      @sheet.div(:p)
+      str = @sheet.render_array
+      str.should match /div:hover/
+      str.should match /div.foo/
+      str.should match /div.p/
     end
   end
   
@@ -762,12 +772,10 @@ CSS
   background-color: #666;
   font-family: verdana;
 }
-
 #wrapper {
   background-color: white;
   margin: 1em auto;
 }
-
 .foo {
   color: red;
 }"
@@ -816,6 +824,10 @@ CSS
         div( :next, :again ){
           color :red
         }
+        
+        id(:wrapper) {
+          margin 1.em, :auto
+        }
       end
     end
     
@@ -824,7 +836,7 @@ CSS
     end
     
     it 'aliases #style to #s' do
-      @sheet.render.should match /^\.abridged_syntax/
+      @sheet.render.should match /.abridged_syntax \{/
     end
     
     it 'assigns multiple arguments to comma separated' do
@@ -843,6 +855,10 @@ div.next,
 div.again {
   color: red;
 }"
+    end
+    
+    it 'makes id selectors' do
+      @sheet.render.should include '#wrapper {'
     end
     
     describe 'nesting' do
@@ -887,8 +903,8 @@ div.again {
       end
       
       it 'should indent the nested style to the right level' do
-        @output.should match /^\W{2}*form label \{$/
-        @output.should match /^\W{4}*form label \{$/
+        @output.should match /^\W{2}form label \{$/
+        @output.should match /^\W{4}form label input \{$/
       end
       
       it 'puts property declarations after a nested style in the right place' do
@@ -907,10 +923,93 @@ form {
       end
     end
     
-    # input[:readonly]{ ... }
-    # input['type=text']{ ... }
-    # how to handle :hover and other psuedo selectors
-    # p.classy < a 
+    describe 'joining/concatenating' do
+      class Joiner < Sheet
+        def content
+          c(:foo) {
+            background :color => :blue
+            concat(:bar){
+              color :white
+            }
+            concat(:hover){
+              background :color => :lightyellow
+            }
+            c(:focus){
+              background :color => :gold
+            }
+          }
+        end
+      end
+      
+      it 'should make a style for the concatenated selectors' do
+        Joiner.render.should include ".foo.bar {"
+      end
+      
+      it 'should make a concatenated selector for psuedo selectors with concat' do
+        Joiner.render.should include '.foo:hover {'
+      end
+      
+      it 'should make a concatenated selector for psuedo selectors regardless' do
+        Joiner.render.should include '.foo:focus {'
+      end
+    end
+    
+    describe 'child direct descendant' do
+      class Childish < Sheet
+        def content
+          c(:foo) {
+            background :color => :blue
+            child(:bar, :p) {
+              background :color => :red
+            }
+          }
+        end
+      end
+      
+      before :all do
+        @str = Childish.render
+      end
+      
+      it 'correctly builds selectors for classes' do
+        @str.should include '.foo > .bar'
+      end
+      
+      it 'correctly builds selectors for tags' do
+        @str.should include '.foo > p'
+      end
+      
+      it 'should render embedded properties' do
+        @str.should include "background-color: red"
+      end
+    end
+    
+    describe 'attribute' do
+      class Attr < Sheet
+        def content
+          c(:input) {
+            background :color => :blue
+            attr(:disabled) {
+              color :grey
+            }
+          }
+        end
+      end
+      
+      before :all do
+        @str = Attr.render
+      end
+      
+      
+      it 'should concatenate the selector' do
+        @str.should include "input[disabled]"
+      end
+      
+      it 'should render embedded properties' do
+        @str.should include "color: grey"
+      end
+    end
+    
+    
     # #css method on objects that allows instance eval of blocks globally
   end
 end

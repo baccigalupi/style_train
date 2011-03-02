@@ -15,15 +15,18 @@ module StyleTrain
       else
         send render_method
       end
+      
+      render_array(opts)
+    end
+    
+    def render_array opts={}
       if opts[:type] 
         render_type = opts[:type]
-        joiner = "\n"
       else
         render_type = :full
-        joiner = "\n\n"
       end
       
-      output.map{|s| s.is_a?(String) ? s : s.render( render_type ) }.join(joiner)
+      output.map{|s| s.is_a?(String) ? s : s.render( render_type ) }.join("\n")
     end
     
     def header
@@ -34,8 +37,40 @@ module StyleTrain
 CSS
    end
     
-    def style(*selectors)
-      s = Style.new(:selectors => selectors, :level => level, :context => context)
+    def style_options
+      {:level => level, :context => context}
+    end
+    
+    def style(*selectors, &block)
+      s = Style.new( style_options.merge(:selectors => selectors) )
+      add_style_to_queue(s, &block)
+    end
+    
+    alias :c :style
+    
+    def id(*selectors, &block)
+      selectors = selectors.map{|s| "##{s}"}
+      style(*selectors, &block)
+    end
+    
+    def concat(*selectors, &block)
+      s = Style.new( style_options.merge(:selectors => selectors, :concat => true ) )
+      add_style_to_queue(s, &block)
+    end
+    
+    alias :cat :concat
+    
+    def child(*selectors, &block)
+      s = Style.new( style_options.merge(:selectors => selectors, :child => true))
+      add_style_to_queue(s, &block)
+    end
+    
+    def attr(*selector, &block)
+      selector = selector.map{|s| "[#{s}]"}
+      concat(*selector, &block)
+    end
+    
+    def add_style_to_queue(s, &block)
       self.output << s
       self.contexts.unshift( s )
       if block_given?
@@ -50,15 +85,15 @@ CSS
       contexts.first
     end
     
-    alias :c :style
-    
     TAGS = StyleTrain::Style::TAGS
     
     TAGS.each do |tag|
       class_eval <<-RUBY
         def #{tag}(*selectors, &block)
           if selectors.size > 0
-            selectors = selectors.map{ |e| '#{tag}' + '.' + e.to_s }
+            selectors = selectors.map do |e|
+              '#{tag}' + StyleTrain::Style.selector(e, :exclude_tags => true) 
+            end  
             style( *selectors, &block )
           else
             style( '#{tag}', &block )

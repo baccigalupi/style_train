@@ -1,19 +1,24 @@
 module StyleTrain
   class Style
-    attr_accessor :selectors, :level, :properties
+    attr_accessor :selectors, :level, :properties, :opts
     
     def initialize(opts)
+      self.opts = opts
       self.level = opts[:level].to_i
       self.selectors = []
       self.properties = []
       set_selectors opts[:selectors], opts[:context] && opts[:context].selectors
     end
     
+    def spacing(value)
+      PSUEDOS.include?(value) || opts[:concat] ? '' : ' '
+    end
+    
     def set_selectors values, contexts
       if contexts
         contexts.each do |context|
           values.each do |value|
-            self.selectors << "#{context} #{make_selector(value)}"
+            self.selectors << "#{context}#{spacing(value)}#{make_selector(value)}"
           end
         end
       else
@@ -37,17 +42,43 @@ module StyleTrain
       :tr, :tt, :u, :ul, :var
     ]
     
+    PSUEDOS = [
+      :link, :visited, :hover, :active, :target, :before, :after, 
+      :enabled, :disabled, :checked, :focus
+    ]
+    
     def make_selector(value)
-      value.is_a?(String) || TAGS.include?(value) ? "#{value}" : ".#{value}"
+      self.class.selector(value, opts)
+    end
+    
+    def self.selector(value, opts={})
+      value = if value.is_a?(String) || (!opts[:exclude_tags] && TAGS.include?(value))
+        value.to_s 
+      elsif PSUEDOS.include?(value)
+        ":#{value}"
+      else
+        ".#{value}"
+      end
+      opts[:child] ? "> #{value}" : value
     end
     
     INDENT = '  '
     
     def render(type=:full)
-      type == :full ? render_full : render_linear
+      if properties.empty?
+        render_empty
+      elsif type == :full
+        render_full
+      else
+        render_linear
+      end
     end
     
     alias :to_s :render
+    
+    def render_empty
+      "#{indent}/* #{selectors.join(', ')} {} */"
+    end
     
     def render_full
       str = ""

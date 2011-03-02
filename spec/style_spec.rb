@@ -26,6 +26,28 @@ describe Style do
     it 'takes into account the context' do
       Style.new(:selectors => @selectors, :context => @context).selectors.should == ['a.special p', 'a.special .classy']
     end
+    
+    it 'makes the correct selectors with the :concat option' do
+      Style.new(:selectors => [:hover, :classy], :context => @context, :concat => :true).selectors.should == [
+        'a.special:hover', 'a.special.classy'
+      ]
+    end
+    
+    it 'makes the correct selectors with the :child option' do
+      Style.new(:selectors => [:bar, :p], :context => @context, :child => :true).selectors.should == [
+        'a.special > .bar', 'a.special > p'
+      ]
+    end
+    
+    it 'concatenates psuedo selectors automatically' do
+      Style.new(:selectors => [:hover, :classy], :context => @context).selectors.should == [
+        'a.special:hover', 'a.special .classy'
+      ]
+    end
+    
+    it 'excludes tags when requested' do
+      Style.selector(:p, :exclude_tags => :true)
+    end
   end
   
   describe 'properties' do
@@ -43,18 +65,24 @@ describe Style do
   
   describe 'rendering' do
     describe 'types' do
-      before :all do
-        @style = Style.new(:selectors => @selectors)
+      before do
+        @style = Style.new(:selectors => @selectors, :level => 2)
       end
       
       it 'renders full by default' do
+        @style.properties << "foo:bar"
         @style.should_receive(:render_full)
         @style.render
       end
     
       it 'renders minimized if an argument is passed in' do
+        @style.properties << "foo:bar"
         @style.should_receive(:render_linear)
         @style.render(:something_else)
+      end
+      
+      it 'renders a commented line if the declaration is empty' do
+        @style.render.should == "    /* p, .classy {} */"
       end
     end
     
