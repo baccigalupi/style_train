@@ -217,8 +217,9 @@ CSS
         @sheet.background(:repeat => :none).should include 'background-repeat: no-repeat'
       end
       
-      it 'will create a background-color property if it receives a string that converts to a color' 
-      it 'will create a background-color property if it receives a color'
+      it 'will create a background property if it receives a single non options argument' do
+        @sheet.background(:blue).should include 'background: blue'
+      end 
     end
     
     describe 'border' do
@@ -227,7 +228,11 @@ CSS
       end
       
       it 'takes the width it is passed in' do
-        @sheet.border(:width => 3.px).should include 'border: 3px solid black;'
+        @sheet.border(:width => 3.px).should include 'border: 3px solid black'
+      end
+      
+      it 'takes in the width as size too' do
+        @sheet.border(:size => 5.px).should include 'border: 5px solid black'
       end
       
       it 'takes in the color when it is passed in' do
@@ -250,6 +255,21 @@ CSS
       
       it 'should do :none' do
         @sheet.border(:none).should include 'border: none'
+      end
+    
+      it 'should work with :only and :none' do
+        @sheet.border(:none, :only => [:bottom, :left]).should include(
+          'border-bottom: none', 'border-left: none'
+        )
+      end
+    
+      describe 'specific borders' do
+        it 'has a method for each side' do
+          @sheet.border_left.should include 'border-left: 1px solid black'
+          @sheet.border_right.should include 'border-right: 1px solid black'
+          @sheet.border_top.should include 'border-top: 1px solid black'
+          @sheet.border_bottom.should include 'border-bottom: 1px solid black'
+        end
       end
     end
     
@@ -286,7 +306,7 @@ CSS
         end
       end
       
-      describe '#height' do
+      describe '#width' do
         it 'makes a height declaration' do
           @sheet.width(320.px).should include 'width: 320px;'
         end
@@ -298,6 +318,13 @@ CSS
         it 'will make a min width declaration' do
           @sheet.min_width(200.px).should include 'min-width: 200px'
         end
+      end
+      
+      describe '#dimensions' do
+        it 'takes an array'
+        it 'takes two arguments'
+        it 'takes an array and options with min and max'
+        it 'takes two dimension arguments and options with min and max'
       end
     end
     
@@ -560,10 +587,22 @@ CSS
         @sheet.color(StyleTrain::Color.new('#456')).should include 'color: #456'
       end
       
-      it 'overflows' do
+      it 'overflow' do
         @sheet.overflow(:hidden).should include 'overflow: hidden'
         @sheet.overflow(:x => :scroll).should include 'overflow-x: scroll'
         @sheet.overflow(:y => :auto).should include 'overflow-y: auto'
+      end
+      
+      it 'overflow_x' do
+        @sheet.overflow_x(:auto).should include 'overflow-x: auto'
+      end
+      
+      it 'overflow_y' do
+        @sheet.overflow_y(:scroll).should include 'overflow-y: scroll'
+      end
+      
+      it 'z_index' do
+        @sheet.z_index(3).should include 'z-index: 3'
       end
       
       it 'display' do
@@ -583,7 +622,9 @@ CSS
       end
       
       it 'opacity' do
-        @sheet.opacity(0.5).should include 'opacity: 0.5'
+        str = @sheet.opacity(0.5)
+        str.should include 'opacity: 0.5'
+        str.should include 'filter: alpha(opacity=50)'
       end
     end
   end

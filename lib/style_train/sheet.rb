@@ -112,11 +112,15 @@ CSS
     
     def background( opts )
       str = ""
-      str << property('background-color', Color.new(opts[:color])) if opts[:color]
-      str << property('background-image', "url('#{opts[:image]}')") if opts[:image]
-      str << property('background-position', opts[:position]) if opts[:position]
-      str << property('background-attachment', opts[:attachment]) if opts[:attachment]
-      str << property('background-repeat', background_repeat_value(opts[:repeat])) if opts[:repeat]
+      if opts.is_a?(Hash)
+        str << property('background-color', Color.new(opts[:color])) if opts[:color]
+        str << property('background-image', "url('#{opts[:image]}')") if opts[:image]
+        str << property('background-position', opts[:position]) if opts[:position]
+        str << property('background-attachment', opts[:attachment]) if opts[:attachment]
+        str << property('background-repeat', background_repeat_value(opts[:repeat])) if opts[:repeat]
+      else
+        str << property('background', opts )
+      end
       str
     end
     
@@ -131,32 +135,51 @@ CSS
       end
     end
     
-    def border(opts={})
+    def border(*args)
+      str = ""
+      if args.size == 1
+        opts = args.first
+      else
+        opts = args.last || {}
+        none = true
+      end
+      
+      
       if opts.is_a?(Hash)
         value = border_value(opts)
         if only = opts[:only]
-          if only.is_a?(Array)
-            str = ""
-            only.each do |type|
-              str << property( "border-#{type}", value )
-            end
-            str
-          else
-            property "border-#{only}", value
+          Array(only).flatten.each do |side| 
+            value = :none if none
+            str << property("border-#{side}", value) 
           end
-        else
-          property "border", value
+        else  
+          str << property( "border", value )
         end
       else
-        property "border", opts
+        str << property( "border", opts )
       end
+      
+      str
     end
     
+    ['left', 'right', 'top', 'bottom'].each do |side|
+      class_eval <<-RUBY
+        def border_#{side}(opts={})
+          property('border-#{side}', border_value(opts))
+        end
+      RUBY
+    end
+    
+    
     def border_value(opts)
-      color = opts[:color] || 'black'
-      style = opts[:style] || 'solid'
-      width = opts[:width] || '1px'
-      "#{width} #{style} #{color}"
+      if opts.is_a?(Hash)
+        color = opts[:color] || 'black'
+        style = opts[:style] || 'solid'
+        width = opts[:width] || opts[:size] || '1px'
+        "#{width} #{style} #{color}"
+      else
+        opts.to_s
+      end
     end
     
     def outline(opts={})
@@ -201,33 +224,29 @@ CSS
     
     def margin(*opts)
       opts = opts.size == 1 ? opts.first : opts
-      if opts.is_a?(Array)
-        property('margin', opts)
-      elsif opts.is_a?(String)
-        property('margin', opts)  
+      if opts.is_a?(Hash)
+          str = ""
+          str << property('margin-left', opts[:left]) if opts[:left]
+          str << property('margin-top', opts[:top]) if opts[:top]
+          str << property('margin-bottom', opts[:bottom]) if opts[:bottom]
+          str << property('margin-right', opts[:right]) if opts[:right]
+          str
       else
-        str = ""
-        str << property('margin-left', opts[:left]) if opts[:left]
-        str << property('margin-top', opts[:top]) if opts[:top]
-        str << property('margin-bottom', opts[:bottom]) if opts[:bottom]
-        str << property('margin-right', opts[:right]) if opts[:right]
-        str
+        property('margin', opts)
       end
     end
     
     def padding(*opts)
       opts = opts.size == 1 ? opts.first : opts
-      if opts.is_a?(Array)
-        property('padding', opts)
-      elsif opts.is_a?(String)
-        property('padding', opts)  
-      else
+      if opts.is_a?(Hash)
         str = ""
         str << property('padding-left', opts[:left]) if opts[:left]
         str << property('padding-top', opts[:top]) if opts[:top]
         str << property('padding-bottom', opts[:bottom]) if opts[:bottom]
         str << property('padding-right', opts[:right]) if opts[:right]
         str
+      else
+        property('padding', opts)
       end
     end
     
@@ -275,9 +294,18 @@ CSS
       end
     end
     
+    def opacity(value)
+      value = value.to_f
+      str = ""
+      str << property( 'opacity', value )
+      str << property( 'filter', "alpha(opacity=#{(value*100).to_i})")
+      str 
+    end
+    
     [
-      'color', 'display', 'float', 'clear', 'visibility', 'cursor', 'opacity',
-      'height', 'width', 'max_height', 'max_width', 'min_height', 'min_width' 
+      'color', 'display', 'float', 'clear', 'visibility', 'cursor',
+      'height', 'width', 'max_height', 'max_width', 'min_height', 'min_width',
+      "overflow_x", 'overflow_y', 'z_index' 
     ].each do |meth|
       class_eval <<-RUBY
         def #{meth}(value)
@@ -402,7 +430,7 @@ CSS
     
     def export opts={}
       name = file_name(opts[:file_name]) 
-      str = render (opts[:render_method] || :content), opts
+      str = render(opts[:render_method] || :content), opts
       File.open("#{StyleTrain.dir}/#{file_name}.css", 'w'){ |f| f.write(str) }
     end
     
