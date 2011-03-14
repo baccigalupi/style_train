@@ -183,6 +183,7 @@ module StyleTrain
         end  
       end 
       raise KeywordError, "Keyword match not found for color matching rgb( #{self.r}, #{self.g}, #{self.b} )" unless found 
+      self
     end
   
     def render_as_given 

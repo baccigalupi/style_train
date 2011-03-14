@@ -16,6 +16,10 @@ describe Fixnum do
   it '#pt converts to a string with % at the end' do
     42.pt.should == '42pt'
   end
+  
+  it '#degrees converts to a snring with degrees at the end' do
+    42.degrees.should == '42degrees'
+  end
 end
 
 describe Float do
@@ -23,7 +27,15 @@ describe Float do
     1.5.em.should == '1.5em'
   end
   
-  it '#pt converts to a string with % at the end' do
+  it '#pt converts to a string with pt at the end' do
     12.5.pt.should == '12.5pt'
+  end
+  
+  it '#percent converts to a string with % at the end' do
+    30.25.percent.should == '30.25%'
+  end
+  
+  it '#degrees converts to a snring with degrees at the end' do
+    42.5.degrees.should == '42.5degrees'
   end
 end

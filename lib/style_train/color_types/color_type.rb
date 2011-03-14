@@ -18,7 +18,7 @@ module StyleTrain
         @message ||= 'Alpha must be between 0.0 and 1.0'
       end
     end
-  
+    
     # ATTRIBUTES  
     attr_accessor :r, :g, :b 
     attr_reader :alpha 
@@ -36,7 +36,7 @@ module StyleTrain
     end
   
     def type_initialize( color, opts ) 
-      raise NotYetImplemented, "type_initialize must be implemented for #{self}"
+      raise "type_initialize must be implemented for #{self}"
     end  
   
     def alpha=( value ) 
@@ -54,7 +54,7 @@ module StyleTrain
     end 
   
     def build 
-      raise NotImplementedError, "#build must be implemented for #{self.class}"
+      raise "#build must be implemented for #{self.class}"
     end   
   
     def self.is_color?( color )
@@ -94,8 +94,11 @@ module StyleTrain
       mixed.g = ratio(self.g, color.g, mix_ratio)
       mixed.b = ratio(self.b, color.b, mix_ratio)
       mixed.alpha = ratio(self.alpha, color.alpha, mix_ratio, false)
-      mixed.build
-      mixed
+      begin 
+        mixed.build
+      rescue
+        HexColor.new(mixed)
+      end
     end
   
     def layer( color )
@@ -148,7 +151,7 @@ module StyleTrain
     end   
   
     def render_as_given 
-      raise NotImplementedError, "#render_as_given must be implemented for #{self.class}"
+      raise "#render_as_given must be implemented for #{self.class}"
     end     
   
     def render_as_rgba
@@ -174,8 +177,8 @@ module StyleTrain
       @color_opts ||= Gnash.new(
         :rgb => 'StyleTrain::RGBcolor',
         :keyword => 'StyleTrain::KeywordColor', 
-        :hex => 'StyleTrain::HexColor' 
-        # :hsl => 'HSLcolor' # when this class exists
+        :hex => 'StyleTrain::HexColor', 
+        :hsl => 'StyleTrain::HSLcolor'
       ) 
     end 
    
@@ -218,7 +221,12 @@ module StyleTrain
       v = num <= 255 && num >= 0 
       raise ByteNumberError if v != true && raise_exe
       v
-    end  
+    end 
+    
+    def self.normalize_degrees(value) 
+      num = value.to_i
+      raise DegreeError if num > 360 || number < 0
+    end
   
     def self.percent_to_byte( number ) 
       raise PercentageError  if number > 100.0 || number < 0.0 
@@ -228,6 +236,10 @@ module StyleTrain
     def self.byte_to_percentage( number )
       raise ByteNumberError if number > 255.0 || number < 0.0 
       ( number/2.55 ).round
+    end
+    
+    def self.normalize_degrees( number )
+      number.to_i % 360
     end                
   end
 end 

@@ -94,6 +94,28 @@ module StyleTrain
       end
       array << end_color
       array
+    end
+    
+    def mix(color, ratio=0.5)
+      Color.new(delegate.mix(self.class.colorize(color), ratio))
+    end
+    
+    def +(color)
+      mix(color)
+    end
+    
+    def -(color)
+      Color.new(self.class.colorize(color).mix(delegate))
+    end
+    
+    def self.colorize(value)
+      if value.is_a?(Color)
+        value.delegate
+      elsif color.is_a?(ColorType)
+        value
+      else
+        Color.new(value)
+      end
     end    
   
     def render(render_style=nil) 

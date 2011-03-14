@@ -21,6 +21,7 @@ module StyleTrain
     def build 
       self.hex =  "%.2x" % self.r + "%.2x" % self.g + "%.2x" % self.b
       self.hex_6 = ('0x' + self.hex).to_i(16)
+      self
     end  
       
     def self.expand( hex ) 

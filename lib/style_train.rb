@@ -22,6 +22,7 @@ require 'style_train/color_types/hsl_color'
 require 'style_train/color_types/keyword_color'
 require 'style_train/color_types/hex_color'
 require "style_train/color"
+require 'style_train/new_color'
 
 # Big Picture Stuff, sheets, themes, etc
 require 'style_train/style'

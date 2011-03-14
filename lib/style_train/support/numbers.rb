@@ -1,5 +1,5 @@
 class Fixnum
-  ['px', 'em', 'pt'].each do |meth|
+  ['px', 'em', 'pt', 'degrees'].each do |meth|
     class_eval <<-RUBY
       def #{meth}
         self.to_s + "#{meth}"
@@ -13,11 +13,15 @@ class Fixnum
 end
 
 class Float
-  ['em', 'pt'].each do |meth|
+  ['em', 'pt', 'degrees'].each do |meth|
     class_eval <<-RUBY
       def #{meth}
         self.to_s + "#{meth}"
       end
     RUBY
+  end
+  
+  def percent
+    "#{self}%"
   end
 end

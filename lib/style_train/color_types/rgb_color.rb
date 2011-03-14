@@ -39,6 +39,7 @@ module StyleTrain
       self.red =    self.r
       self.green =  self.g
       self.blue =   self.b
+      self
     end    
   
     def normalize_internal_rgb( value )

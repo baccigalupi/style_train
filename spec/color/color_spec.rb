@@ -6,6 +6,10 @@ KeywordColor = StyleTrain::KeywordColor unless defined?( KeywordColor )
 RGBcolor = StyleTrain::RGBcolor unless defined?( RGBcolor )
 
 describe Color do
+  
+  
+  
+  
   def build_color_type( color_class, args ) 
     color_class.new(:color => args)
   end
@@ -87,7 +91,7 @@ describe Color do
         end
       end
     
-      describe 'hsl colors' 
+      # describe 'hsl colors' 
     end
     
     describe 'options' do
@@ -187,6 +191,10 @@ describe Color do
   end
   
   describe 'rendering' do
+    it 'should render hex if alpha is 1'
+    it 'should render rgba if alpha is less than 1'
+    it 'should flatten if rendering with :ie'
+    
     it 'should render via the delegates default method by default' do
       Color.new(:white).render.should == build_color_type(KeywordColor, :white).render_as_given
       Color.new(['100%', '100%', '100%']).render.should == build_color_type(RGBcolor, ['100%', '100%', '100%']).render_as_given
@@ -247,6 +255,51 @@ describe Color do
     
     it 'last color should be the last point' do
       @steps.last.should == @yellow.delegate
+    end
+  end
+  
+  describe "mixing" do
+    before :all do
+      @black = Color.new('#000')
+      @yellow = Color.new(:lightyellow)
+      @trans = Color.new(:lightyellow, :alpha => 0.5)
+    end
+    
+    it 'mixes half of each by default' do
+      color = @black.mix(@yellow)
+      color.r.should == (@yellow.r/2.0).round
+      color.g.should == (@yellow.g/2.0).round
+      color.b.should == (@yellow.b/2.0).round
+      color.alpha.should == 1.0
+    end
+    
+    it 'mixes alphas' do
+      color = @black.mix(@trans)
+      color.r.should == (@yellow.r/2.0).round
+      color.g.should == (@yellow.g/2.0).round
+      color.b.should == (@yellow.b/2.0).round
+      color.alpha.should == 0.75
+    end
+    
+    it 'mixes to hex when there the delegate type cannot be made' do
+      color = @yellow.mix(@black)
+      color.delegate.class.should == HexColor
+    end
+    
+    it 'mixes via default when using +' do
+      (@yellow + @black).should == @yellow.mix(@black)
+    end
+    
+    it 'mixes in reverse order when using -' do
+      (@yellow - @black).should == @black.mix(@yellow)
+    end
+    
+    it 'will mix on a ratio' do
+      color = @black.mix(@trans, 0.25)
+      color.r.should == (@trans.r*0.25).round
+      color.b.should == (@trans.r*0.25).round
+      color.g.should == (@trans.r*0.25).round
+      color.alpha.should == @trans.alpha*0.25
     end
   end
 end

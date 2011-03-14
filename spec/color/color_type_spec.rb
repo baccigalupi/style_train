@@ -7,6 +7,25 @@ RGBcolor = StyleTrain::RGBcolor unless defined?( RGBcolor )
 
 describe ColorType do 
   describe 'class methods' do
+    describe 'degrees' do
+      it 'should return a number between 0 and 359 when given such a number' do
+        ColorType.normalize_degrees(42).should == 42
+      end
+      
+      it 'should return a number when given a string' do
+        ColorType.normalize_degrees('42').should == 42
+      end
+      
+      it 'should normalize a number greater than 359' do
+        ColorType.normalize_degrees(360).should == 0
+        ColorType.normalize_degrees(460).should == 100
+      end
+      
+      it 'should normalize negative number' do
+        ColorType.normalize_degrees(-127).should == 233
+      end
+    end
+    
     describe 'percentages' do
       it 'should return false if string does not contain a percentage' do 
         ColorType.percentage( '255' ).should == false
@@ -268,7 +287,8 @@ describe ColorType do
     describe 'mixing' do
       before do
         @rgb = RGBcolor.new(:color => [20,40,60], :alpha => 0.5)
-        @hex = HexColor.new(:color => '#666') 
+        @hex = HexColor.new(:color => '#666')
+        @keyword = KeywordColor.new(:color => :lightyellow) 
       end
       
       describe 'averaging (getting a midway point)' do
@@ -376,6 +396,11 @@ describe ColorType do
           color.class.should == RGBcolor
           
           color = @hex.mix(@rgb, 0.25)
+          color.class.should == HexColor
+        end
+        
+        it 'returns hex when the original color type cannot be built' do
+          color = @keyword.mix(@rgb, 0.25)
           color.class.should == HexColor
         end
       end
