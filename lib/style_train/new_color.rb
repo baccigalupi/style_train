@@ -1,7 +1,8 @@
 module StyleTrain
   class NewColor
-    attr_accessor :type, :r, :g, :b, :alpha, :background,
+    attr_accessor :type, :r, :g, :b, 
       :hex, :hex_6, :h, :s, :l
+    attr_reader :alpha 
     
     def initialize(*args)
       if type = args.last.is_a?(Hash) && args.last[:type]
@@ -9,6 +10,22 @@ module StyleTrain
       else
         autodetect(args)
       end
+      
+      if non_null?
+        if (opts = args.last) && args.last.is_a?(Hash)
+          self.alpha = opts[:alpha]
+          self.background = opts[:background] if opts[:background]
+        end
+      end
+      self.alpha = 1.0 if alpha.nil? && non_null?
+    end
+    
+    def transparent?
+      type == :transparent
+    end
+    
+    def non_null?
+      !transparent?
     end
     
     def build_for_type(type, args)
@@ -67,7 +84,6 @@ module StyleTrain
       end
     end
     
-    
     def build_rgb(args)
       array = args[0..2].compact
       first_value = self.class.normalize_for_rgb(array.first) rescue nil
@@ -118,14 +134,13 @@ module StyleTrain
       end
     end
     
-    
     def build_rgb_from_hsl
-      self.r = hsl_to_rgb( h + 1/3.0 )
-      self.g = hsl_to_rgb( h )
-      self.b = hsl_to_rgb( h - 1/3.0 )
+      self.r = hsl_value_to_rgb( h + 1/3.0 )
+      self.g = hsl_value_to_rgb( h )
+      self.b = hsl_value_to_rgb( h - 1/3.0 )
     end
     
-    def hsl_to_rgb( value )
+    def hsl_value_to_rgb( value=[h,s,l] )
       value = value + 1 if value < 0 
       value = value - 1 if value > 1
       if value * 6 < 1
@@ -147,6 +162,7 @@ module StyleTrain
       l*2-hsl_median_2
     end
     
+    # CLASS LEVEL VALUE NORMALIZERS -----------------------------------------------
     def self.normalize_for_rgb(value)
       if value.is_a?(String)
         if value.match(percentage_regex)
@@ -213,6 +229,145 @@ module StyleTrain
     
     def self.percentage_to_byte(value)
       (normalize_percentage(value) * 2.55 ).round
+    end
+    
+    # OPTIONAL PROPERTIES ----------------------------------------------
+    def alpha=(value)
+      if value
+        @alpha = if value.is_a?(String) || value.is_a?(Fixnum)
+          self.class.normalize_percentage(value)/100.0
+        else
+          self.class.normalize_ratio(value)
+        end
+      end
+    end
+    
+    def background=(value)
+      @background = if value.is_a?(self.class)
+        value
+      else
+        self.class.new(*value)
+      end
+    end
+    
+    def background
+      @background || self.class.new(:white) unless type == :transparent
+    end
+    
+    # COMPARITORS ------------------------------------------------------
+    def ==(other)
+      self =~ other &&
+      self.alpha == other.alpha
+    end
+    
+    def ===(other)
+      self.object_id == other.object_id
+    end
+    
+    def =~(other)
+      self.r == other.r &&
+      self.g == other.g &&
+      self.b == other.b
+    end
+    
+    # CONVERSIONS ------------------------------------------------------
+    def set_hsl
+      rgb = [r, g, b]
+      max = rgb.max 
+      min = rgb.min
+      avg = ( max + min )/2.0
+      diff = ( max - min ).to_f
+      lightness = avg
+      
+      if max == min  # achromatic
+        hue = 0
+        saturation = 0
+      else
+        saturation = if avg > 0.6
+          lightness / ( 2 - max - min )
+        else
+          diff / ( max + min )
+        end
+        
+        diff_r = (((max - r) / 6) + (diff / 2)) / diff;
+        diff_g = (((max - g) / 6) + (diff / 2)) / diff;
+        diff_b = (((max - b) / 6) + (diff / 2)) / diff;
+        
+        hue = if r == max
+          diff_b - diff_g
+        elsif g == max
+          1/3.0 + diff_r - diff_b
+        else
+          2/3.0 + diff_g - diff_r
+        end
+      end
+      
+      
+      hue += 1 if hue < 0
+      hue -= 1 if hue > 1
+
+      self.type = :hsl
+      self.h = hue
+      self.s = saturation
+      self.l = lightness
+      
+      self
+    end
+    
+    def set_rgb
+      self.type = :rgb
+    end
+    
+    def set_hex
+      self.type = :hex
+      self.hex = ""
+      self.hex << sprintf( "%02X", r*255 );
+      self.hex << sprintf( "%02X", g*255 );
+      self.hex << sprintf( "%02X", b*255 );
+      self.hex_6 = self.class.normalize_hex(hex)
+    end
+    
+    def hsl_to_rgb
+      self.type = :rgb
+      self.hex = nil
+      self.hex_6 = nil
+      build_rgb_from_hsl
+      self
+    end
+    
+    # transformations
+    def shift(value)
+      value = self.class.normalize_modifier(value) 
+      self.hex = nil
+      self.hex_6 = nil
+      set_hsl unless :type == :hsl
+      yield(value)
+      hsl_to_rgb
+    end
+
+    def lighten(value=0.1)
+      shift(value) {|v| self.l = [1.0, l + v].min }
+    end
+    
+    def darken(value=0.1)
+      shift(value) { |v| self.l = [0.0, l - v].max }
+    end
+    
+    def saturate(value=0.1)
+      shift(value) { |v| self.s = [1.0, s + v].min }
+    end
+    
+    def dull(value=0.1)
+      shift(value) { |v| self.s = [0.0, s - v].max }
+    end
+    
+    alias :brighten :saturate
+    alias :desaturate :dull
+    
+    def self.normalize_modifier(value)
+      value = value/100.0 if value.is_a?(Integer)
+      value = normalize_percentage(value)/100.0 if value.is_a?(String)
+      value = normalize_ratio(value)
     end
     
     KEYWORD_MAP = {

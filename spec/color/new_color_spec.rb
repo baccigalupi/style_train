@@ -31,6 +31,7 @@ describe Color do
       
         it 'should ignore options, alpha, background, etc' do
           color = Color.new(:transparent, :alpha => 1.0, :background => '#666')
+          color.type.should == :transparent
           color.alpha.should == 0
           color.background.should be_nil
         end
@@ -240,6 +241,204 @@ describe Color do
         end
       end
     end
+  
+    describe 'alpha' do
+      describe 'autodetection' do
+        it 'ignores the alpha with a transparent color' do
+          Color.new(:transparent, :alpha => 0.5).alpha.should == 0.0
+        end
+        
+        it 'sets the alpha with a keyword type' do
+          Color.new(:lightyellow, :alpha => 0.5).alpha.should == 0.5
+        end
+        
+        it 'sets the alpha with a hex color' do
+          Color.new('#666', :alpha => 0.75).alpha.should == 0.75
+        end
+        
+        it 'sets the alpha with a rgb color' do
+          Color.new(100.percent, 50.percent, 25.percent, :alpha => 0.25).alpha.should == 0.25
+        end
+        
+        it 'sets the alpha with a hsl color' do
+          Color.new(20.degrees, 50.percent, 50.percent, :alpha => 0.10).alpha.should == 0.1
+        end
+        
+        it 'sets the alpha to 1.0 by default' do
+          Color.new(:lightyellow).alpha.should == 1.0
+        end
+      end
+      
+      describe 'explicit typing' do
+        it 'ignores the alpha with a transparent color' do
+          Color.new(:transparent, :alpha => 0.5, :type => :transparent).alpha.should == 0.0
+        end
+        
+        it 'sets the alpha with a keyword type' do
+          Color.new(:lightyellow, :type => :keyword, :alpha => 0.5).alpha.should == 0.5
+        end
+        
+        it 'sets the alpha with a hex color' do
+          Color.new('#123456', :type => :hex, :alpha => 0.25).alpha.should == 0.25
+        end
+        
+        it 'sets the alpha with a rgb color' do
+          Color.new(255,127,64, :type => :rgb, :alpha => 0.1).alpha.should == 0.1
+        end
+        
+        it 'sets the alpha with a hsl color' do
+          Color.new(20, 50.percent, 50.percent, :type => :hsl, :alpha => 0.75).alpha.should == 0.75
+        end
+      end
+    end
+    
+    describe 'background' do
+      describe 'autodetection' do
+        describe 'different detection types' do
+          it 'ignores the background with a transparent color' do
+            Color.new(:transparent, :background => :black).background.should == nil
+          end
+      
+          it 'sets the background with a keyword type' do
+            Color.new(:lightyellow, :background => :black).background.should == Color.new(:black)
+          end
+      
+          it 'sets the background with a hex color' do
+            Color.new('#666', :background => :black).background.should == Color.new(:black)
+          end
+      
+          it 'sets the background with a rgb color' do
+            Color.new(100.percent, 50.percent, 25.percent, :background => :black).background.should == Color.new(:black)
+          end
+      
+          it 'sets the background with a hsl color' do
+            Color.new(20.degrees, 50.percent, 50.percent, :background => :black).background.should == Color.new(:black)
+          end
+      
+          it 'sets the background to :white by default' do
+            Color.new(:lightyellow).background.should == Color.new(:white)
+          end
+        end
+        
+        describe "different background types/arguments" do
+          it 'takes background a keyword arguments' do
+            Color.new(:lightyellow, :background => :black).background.should == Color.new(:black)
+          end
+      
+          it 'takes background with hex color arguments' do
+            Color.new(:lightyellow, :background => '#000').background.should == Color.new(:black)
+          end
+      
+          it 'takes background with rgb color arguments' do
+            Color.new(:lightyellow, :background => [0,0,0]).background.should == Color.new(:black)
+          end
+      
+          it 'takes background with hsl color arguments' do
+            Color.new(:lightyellow, :background => [0.degrees, 0, 0]).background.should == Color.new(:black)
+          end
+        end
+      end
+      
+      describe 'explicit typing' do
+        it 'ignores the background with a transparent color' do
+          Color.new(:transparent, :background => :black, :type => :transparent).background.should == nil
+        end
+    
+        it 'sets the background with a keyword type' do
+          Color.new(:lightyellow, :background => :black, :type => :keyword).background.should == Color.new(:black)
+        end
+    
+        it 'sets the background with a hex color' do
+          Color.new('#666', :background => :black, :type => :hex).background.should == Color.new(:black)
+        end
+    
+        it 'sets the background with a rgb color' do
+          Color.new(100.percent, 50.percent, 25.percent, :background => :black, :type => :rgb).background.should == Color.new(:black)
+        end
+    
+        it 'sets the background with a hsl color' do
+          Color.new(20.degrees, 50.percent, 50.percent, :background => :black, :type => :hsl).background.should == Color.new(:black)
+        end
+      end
+    end
+  end
+  
+  describe 'alpha' do
+    describe 'acceptable values' do
+      before do
+        @color = Color.new('666')
+      end
+      
+      it 'takes ratios' do
+        @color.alpha = 0.5
+        @color.alpha.should == 0.5
+      end
+      
+      it 'should raise an error if the ratio is out of range' do
+        lambda { @color.alpha = 1.1 }.should raise_error( Color::RatioError )
+      end
+      
+      it 'takes percentages' do
+        @color.alpha = 72.5.percent
+        @color.alpha.should == 0.725
+      end
+      
+      it 'accepts integers as percentages' do
+        @color.alpha = 78
+        @color.alpha.should == 0.78
+      end
+      
+      it 'should raise an error if the percentage is out of range' do
+        lambda { @color.alpha = 300.percent }.should raise_error(Color::PercentageError)
+      end
+    end
+  end
+  
+  describe 'background' do
+    before do
+      @background = Color.new(:lightyellow)
+      @color = Color.new(:black, :alpha => 0.5)
+    end
+    
+    it 'takes a color object' do
+      @color.background = @background
+      @color.background.should == @background
+    end
+    
+    it 'otherwise tries to construct a color object from the arguments' do
+      @color.background = :lightyellow
+      @color.background.should == @background
+    end
+  end
+  
+  describe 'comparisons' do
+    it 'should be === if the colors have the same object id' do
+      (Color.new(:lightyellow) === Color.new(:lightyellow)).should == false
+      color = Color.new(:lightyellow)
+      (color === color).should == true
+    end
+    
+    it 'should be =~ if the colors have the same rgb, but different alphas' do
+      (Color.new(:lightyellow, :alpha => 0.5) =~ Color.new(:lightyellow)).should == true
+    end
+    
+    describe '==' do
+      it 'should be false if the alpha is different' do
+        Color.new(255, 255, 224, :alpha => 0.5).should_not == Color.new(:lightyellow)
+      end
+      
+      it 'should be false if the rgb values are different' do
+        Color.new(255, 255, 225, :alpha => 1.0).should_not == Color.new(:lightyellow)
+      end
+      
+      it 'should be == if the colors have the same rgb and alpha' do
+        Color.new(255, 255, 224, :alpha => 1.0).should == Color.new(:lightyellow)
+      end
+    
+      it 'should be indifferent to backgrounds' do
+        Color.new(255, 255, 224, :alpha => 1.0, :background => :black).should == Color.new(:lightyellow)
+      end
+    end
   end
   
   describe 'normalizer' do
@@ -321,7 +520,313 @@ describe Color do
     end
   end
 
-  describe 'mixing' do
+  describe 'type transformation' do
+    before do
+      @red_values = {
+        :rgb => [100, 25, 25],
+        :hex => ['641919', 0x641919],
+        :hsl => [0.degrees, 0.6, 0.25]
+      }
+      @green_values = {
+        :rgb => [25, 100, 25],
+        :hex => ['196419', 0x196419],
+        :hsl => [120.degrees, 0.60, 0.25]
+      }
+      @blue_values = {
+        :rgb => [25, 25, 100],
+        :hex => ['191964', 0x191964],
+        :hsl => [240.degrees, 0.60, 0.25]
+      }
+    end
     
+    describe '#set_hsl' do
+      before do
+        @red = Color.new(*@red_values[:rgb])
+        @red.set_hsl
+        @blue = Color.new(*@blue_values[:rgb])
+        @blue.set_hsl
+        @green = Color.new(*@green_values[:rgb])
+        @green.set_hsl
+      end
+    
+      it 'changes the type to :hsl' do
+        @red.type.should == :hsl
+        @blue.type.should == :hsl
+        @green.type.should == :hsl
+      end
+    
+      it 'converts adds hsl value' do
+        @red.h.should be_within(0.01).of(Color.normalize_degrees(@red_values[:hsl][0]))
+        @red.s.should be_within(0.01).of( @red_values[:hsl][1])
+        @red.l.should be_within(0.01).of(@red_values[:hsl][2])
+      
+        @green.h.should be_within(0.01).of(Color.normalize_degrees(@green_values[:hsl][0]))
+        @green.s.should be_within(0.01).of( @green_values[:hsl][1])
+        @green.l.should be_within(0.01).of(@green_values[:hsl][2])
+      
+        @blue.h.should be_within(0.01).of(Color.normalize_degrees(@blue_values[:hsl][0]))
+        @blue.s.should be_within(0.01).of( @blue_values[:hsl][1])
+        @blue.l.should be_within(0.01).of(@blue_values[:hsl][2])
+      end
+    end
+    
+    describe '#set_rgb' do
+      before do
+        @color = Color.new('#555')
+        @color.set_rgb
+      end
+      
+      it 'changes the type' do
+        @color.type.should == :rgb
+      end
+    end
+    
+    describe '#set_hex' do
+      before do
+        @red = Color.new(*@red_values[:rgb])
+      end
+      
+      it 'sets the hex and hex_6' do
+        @red.hex = 'foo'
+        @red.hex_6 = 'foo'
+        @red.set_hex
+        @red.hex.should == @red_values[:hex][0]
+        @red.hex_6.should == @red_values[:hex][1]
+      end
+      
+      it 'sets the type to :hex' do
+        @red.set_hex
+        @red.type.should == :hex
+      end
+    end
+    
+    describe '#hsl_to_rgb' do
+      before do
+        @red = Color.new(*@red_values[:hsl])
+        @red.set_hex
+        @red.l += 0.1
+        @red.hsl_to_rgb
+      end
+      
+      it 'resets the r, g, b values from h, s, l' do
+        @red.r.should be_within(0.01).of(143/255.0)
+        @red.g.should be_within(0.01).of(36/255.0)
+        @red.b.should be_within(0.01).of(36/255.0)
+      end
+      
+      it 'sets the type to :rgb' do
+        @red.type.should == :rgb
+      end
+      
+      it 'clears the hex' do
+        @red.hex.should == nil
+        @red.hex_6.should == nil
+      end
+    end
+  end
+
+  describe 'modification' do
+    describe 'shift' do
+      before do
+        @red_values = {
+          :rgb => [100, 25, 25],
+          :hex => ['641919', 0x641919],
+          :hsl => [0.degrees, 0.6, 0.25]
+        }
+        @red = Color.new(*@red_values[:rgb])
+      end
+      
+      describe 'lighten' do
+        before do
+          @red.lighten
+        end
+        
+        it 'adds 10% to the l value by default' do
+          @red.l.should be_within(0.01).of(@red_values[:hsl][2] + 0.1)
+        end
+        
+        it 'recalculates the rgb' do
+          @red.r.should be_within(0.01).of(143/255.0)
+          @red.g.should be_within(0.01).of(36/255.0)
+          @red.b.should be_within(0.01).of(36/255.0)
+        end
+        
+        it 'takes a percentage argument and adds that from the l' do
+          l = @red.l
+          @red.lighten(30.percent)
+          @red.l.should == l + 0.30
+        end
+        
+        it 'takes a ratio argument' do
+          l = @red.l
+          @red.lighten(0.21)
+          @red.l.should == l + 0.21
+        end
+        
+        it 'assumes integers are percentages' do
+          l = @red.l
+          @red.lighten(20)
+          @red.l.should == l + 0.2
+          @red.lighten(80)
+          @red.l.should == 1.0
+        end
+        
+        it 'should cap at 100 percent' do
+          @red.lighten(0.80)
+          @red.l.should == 1.0
+        end
+      end
+      
+      describe 'darken' do
+        before do
+          @red.darken
+        end
+        
+        it 'makes subtracts 10% to the l value by default' do
+          @red.l.should be_within(0.01).of(@red_values[:hsl][2] - 0.1)
+        end
+        
+        it 'recalculates the rgb' do
+          @red.r.should be_within(0.01).of(61/255.0)
+          @red.g.should be_within(0.01).of(15/255.0)
+          @red.b.should be_within(0.01).of(15/255.0)
+        end
+        
+        it 'takes a percentage argument and subtracts that from the l' do
+          l = @red.l
+          @red.darken(5.percent)
+          @red.l.should == l - 0.05
+        end
+        
+        it 'takes a ratio argument' do
+          l = @red.l
+          @red.darken(0.07)
+          @red.l.should == l - 0.07
+        end
+      end
+    
+      describe 'saturate' do
+        before do
+          @red.saturate
+        end
+        
+        it 'adds 10% to the s value by default' do
+          @red.s.should be_within(0.01).of(@red_values[:hsl][1] + 0.1)
+        end
+        
+        it 'recalculates the rgb' do
+          @red.r.should be_within(0.01).of(108/255.0)
+          @red.g.should be_within(0.01).of(19/255.0)
+          @red.b.should be_within(0.01).of(19/255.0)
+        end
+        
+        it 'takes a percentage argument and adds that from the s' do
+          s = @red.s
+          @red.saturate(30.percent)
+          @red.s.should == s + 0.30
+        end
+        
+        it 'takes a ratio argument' do
+          s = @red.s
+          @red.saturate(0.21)
+          @red.s.should be_within(0.01).of(s + 0.21)
+        end
+        
+        it 'assumes integers are percentages' do
+          s = @red.s
+          @red.saturate(20)
+          @red.s.should == s + 0.2
+          @red.saturate(80)
+          @red.s.should == 1.0
+        end
+        
+        it 'should cap at 100 percent' do
+          @red.saturate(0.80)
+          @red.s.should == 1.0
+        end
+        
+        it 'aliases to #brighten' do
+          @red.brighten(0.8)
+          @red.s.should == 1.0
+        end
+      end
+
+      describe 'dull' do
+        before do
+          @red.dull
+        end
+        
+        it 'adds 10% to the s value by default' do
+          @red.s.should be_within(0.01).of(@red_values[:hsl][1] - 0.1)
+        end
+        
+        it 'recalculates the rgb' do
+          @red.r.should be_within(0.01).of(96/255.0)
+          @red.g.should be_within(0.01).of(32/255.0)
+          @red.b.should be_within(0.01).of(32/255.0)
+        end
+        
+        it 'takes a percentage argument and adds that from the s' do
+          s = @red.s
+          @red.dull(30.percent)
+          @red.s.should be_within(0.01).of(s - 0.30)
+        end
+        
+        it 'takes a ratio argument' do
+          s = @red.s
+          @red.dull(0.21)
+          @red.s.should be_within(0.01).of(s - 0.21)
+        end
+        
+        it 'assumes integers are percentages' do
+          s = @red.s
+          @red.dull(20)
+          @red.s.should be_within(0.01).of(s - 0.2)
+          @red.dull(80)
+          @red.s.should == 0.0
+        end
+        
+        it 'should cap at 100 percent' do
+          @red.dull(0.80)
+          @red.s.should == 0.0
+        end
+        
+        it 'aliases to #desaturate' do
+          @red.desaturate(0.8)
+          @red.s.should == 0.0
+        end
+      end
+      
+    end
+    
+    describe 'mixing' do
+      describe 'layering' do
+      end
+      
+      describe 'averaging' do
+      end
+      
+      describe 'mixing on another ratio' do
+      end
+      
+      describe 'multiplication' do
+      end
+      
+      describe 'division' do
+      end
+    end
+  end
+  
+  describe 'rendering' do
+    it 'renders as hex unless there it has some transparency'
+    it 'renders as rgba if there is transparency'
+    it 'renders flattened to hex when there is a background'
+    it 'renders to hsl (a)'
+    
+    describe 'keyword' do
+      it 'renders to keyword'
+      it 'renders to hex if a keyword cannot be found and there is not transparency'
+      it 'renders to rgba if a keyword cannot be found and there is transparency'
+    end
   end
 end
