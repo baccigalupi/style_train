@@ -336,7 +336,7 @@ module StyleTrain
     end
     
     # transformations
-    def shift(value)
+    def shift!(value)
       value = self.class.normalize_modifier(value) 
       self.hex = nil
       self.hex_6 = nil
@@ -344,25 +344,47 @@ module StyleTrain
       yield(value)
       hsl_to_rgb
     end
-
+    
     def lighten(value=0.1)
-      shift(value) {|v| self.l = [1.0, l + v].min }
+      color = self.dup
+      color.lighten!(value)
+    end
+    
+    def lighten!(value=0.1)
+      shift!(value) {|v| self.l = [1.0, l + v].min }
     end
     
     def darken(value=0.1)
-      shift(value) { |v| self.l = [0.0, l - v].max }
+      color = self.dup
+      color.darken!(value)
+    end
+    
+    def darken!(value=0.1)
+      shift!(value) { |v| self.l = [0.0, l - v].max }
     end
     
     def saturate(value=0.1)
-      shift(value) { |v| self.s = [1.0, s + v].min }
+      color = self.dup
+      color.saturate!(value)
+    end
+    
+    def saturate!(value=0.1)
+      shift!(value) { |v| self.s = [1.0, s + v].min }
     end
     
     def dull(value=0.1)
-      shift(value) { |v| self.s = [0.0, s - v].max }
+      color = self.dup
+      color.dull!(value)
+    end
+    
+    def dull!(value=0.1)
+      shift!(value) { |v| self.s = [0.0, s - v].max }
     end
     
     alias :brighten :saturate
+    alias :brighten! :saturate!
     alias :desaturate :dull
+    alias :desaturate! :dull!
     
     def self.normalize_modifier(value)
       value = value/100.0 if value.is_a?(Integer)

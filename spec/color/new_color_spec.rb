@@ -636,9 +636,9 @@ describe Color do
         @red = Color.new(*@red_values[:rgb])
       end
       
-      describe 'lighten' do
+      describe 'lighten!' do
         before do
-          @red.lighten
+          @red.lighten!
         end
         
         it 'adds 10% to the l value by default' do
@@ -653,33 +653,50 @@ describe Color do
         
         it 'takes a percentage argument and adds that from the l' do
           l = @red.l
-          @red.lighten(30.percent)
+          @red.lighten!(30.percent)
           @red.l.should == l + 0.30
         end
         
         it 'takes a ratio argument' do
           l = @red.l
-          @red.lighten(0.21)
+          @red.lighten!(0.21)
           @red.l.should == l + 0.21
         end
         
         it 'assumes integers are percentages' do
           l = @red.l
-          @red.lighten(20)
+          @red.lighten!(20)
           @red.l.should == l + 0.2
-          @red.lighten(80)
+          @red.lighten!(80)
           @red.l.should == 1.0
         end
         
         it 'should cap at 100 percent' do
-          @red.lighten(0.80)
+          @red.lighten!(0.80)
           @red.l.should == 1.0
         end
       end
       
-      describe 'darken' do
+      describe 'lighten' do
         before do
-          @red.darken
+          @less_red = @red.lighten
+        end
+        
+        it 'should not affect the originating color' do
+          @red.type.should == :rgb
+          @red.r.should be_within(0.01).of(0.4)
+        end
+        
+        it 'should return a transformed object' do
+          @less_red.r.should be_within(0.01).of(143/255.0)
+          @less_red.g.should be_within(0.01).of(36/255.0)
+          @less_red.b.should be_within(0.01).of(36/255.0)
+        end
+      end
+      
+      describe 'darken!' do
+        before do
+          @red.darken!
         end
         
         it 'makes subtracts 10% to the l value by default' do
@@ -694,20 +711,37 @@ describe Color do
         
         it 'takes a percentage argument and subtracts that from the l' do
           l = @red.l
-          @red.darken(5.percent)
+          @red.darken!(5.percent)
           @red.l.should == l - 0.05
         end
         
         it 'takes a ratio argument' do
           l = @red.l
-          @red.darken(0.07)
+          @red.darken!(0.07)
           @red.l.should == l - 0.07
         end
       end
     
-      describe 'saturate' do
+      describe 'darken' do
         before do
-          @red.saturate
+          @darker_red = @red.darken
+        end
+        
+        it 'should not affect the originating color' do
+          @red.type.should == :rgb
+          @red.r.should be_within(0.01).of(0.4)
+        end
+        
+        it 'should return a transformed object' do
+          @darker_red.r.should be_within(0.01).of(61/255.0)
+          @darker_red.g.should be_within(0.01).of(15/255.0)
+          @darker_red.b.should be_within(0.01).of(15/255.0)
+        end
+      end
+    
+      describe 'saturate!' do
+        before do
+          @red.saturate!
         end
         
         it 'adds 10% to the s value by default' do
@@ -722,38 +756,55 @@ describe Color do
         
         it 'takes a percentage argument and adds that from the s' do
           s = @red.s
-          @red.saturate(30.percent)
+          @red.saturate!(30.percent)
           @red.s.should == s + 0.30
         end
         
         it 'takes a ratio argument' do
           s = @red.s
-          @red.saturate(0.21)
+          @red.saturate!(0.21)
           @red.s.should be_within(0.01).of(s + 0.21)
         end
         
         it 'assumes integers are percentages' do
           s = @red.s
-          @red.saturate(20)
+          @red.saturate!(20)
           @red.s.should == s + 0.2
-          @red.saturate(80)
+          @red.saturate!(80)
           @red.s.should == 1.0
         end
         
         it 'should cap at 100 percent' do
-          @red.saturate(0.80)
+          @red.saturate!(0.80)
           @red.s.should == 1.0
         end
         
         it 'aliases to #brighten' do
-          @red.brighten(0.8)
+          @red.brighten!(0.8)
           @red.s.should == 1.0
         end
       end
-
-      describe 'dull' do
+      
+      describe 'saturate' do
         before do
-          @red.dull
+          @brighter_red = @red.saturate
+        end
+        
+        it 'should not affect the originating color' do
+          @red.type.should == :rgb
+          @red.r.should be_within(0.01).of(0.4)
+        end
+        
+        it 'should return a transformed object' do
+          @brighter_red.r.should be_within(0.01).of(108/255.0)
+          @brighter_red.g.should be_within(0.01).of(19/255.0)
+          @brighter_red.b.should be_within(0.01).of(19/255.0)
+        end
+      end
+      
+      describe 'dull!' do
+        before do
+          @red.dull!
         end
         
         it 'adds 10% to the s value by default' do
@@ -768,35 +819,51 @@ describe Color do
         
         it 'takes a percentage argument and adds that from the s' do
           s = @red.s
-          @red.dull(30.percent)
+          @red.dull!(30.percent)
           @red.s.should be_within(0.01).of(s - 0.30)
         end
         
         it 'takes a ratio argument' do
           s = @red.s
-          @red.dull(0.21)
+          @red.dull!(0.21)
           @red.s.should be_within(0.01).of(s - 0.21)
         end
         
         it 'assumes integers are percentages' do
           s = @red.s
-          @red.dull(20)
+          @red.dull!(20)
           @red.s.should be_within(0.01).of(s - 0.2)
-          @red.dull(80)
+          @red.dull!(80)
           @red.s.should == 0.0
         end
         
         it 'should cap at 100 percent' do
-          @red.dull(0.80)
+          @red.dull!(0.80)
           @red.s.should == 0.0
         end
         
         it 'aliases to #desaturate' do
-          @red.desaturate(0.8)
+          @red.desaturate!(0.8)
           @red.s.should == 0.0
         end
       end
       
+      describe 'dull' do
+        before do
+          @dull_red = @red.dull
+        end
+        
+        it 'should not affect the originating color' do
+          @red.type.should == :rgb
+          @red.r.should be_within(0.01).of(0.4)
+        end
+        
+        it 'should return a transformed object' do
+          @dull_red.r.should be_within(0.01).of(96/255.0)
+          @dull_red.g.should be_within(0.01).of(32/255.0)
+          @dull_red.b.should be_within(0.01).of(32/255.0)
+        end
+      end
     end
     
     describe 'mixing' do
