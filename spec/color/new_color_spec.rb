@@ -1065,7 +1065,64 @@ describe Color do
     
     describe 'combining colors' do
       describe 'layering' do
+        before do
+          @white = Color.new('#FFF')
+          @shadow = Color.new('#000', :alpha => 0.5)
+          @dark_blue = Color.new(20,40,60, :alpha => 0.5)
+        end 
         
+        describe 'r, g, b values' do
+          describe 'opaque top layer' do
+            it 'should have the r, g, b values of the top layer' do
+              color = @shadow.layer(@white)
+              color.r.should == 1.0 
+              color.g.should == 1.0
+              color.b.should == 1.0 
+            end
+          end  
+        
+          describe 'opaque bottom layer' do
+            before do
+              @color = @white.layer(@shadow) 
+            end 
+          
+            it 'should mix the r, g, and b in proportion to the top layer\'s alpha' do
+              @color.r.should == 0.5
+              @color.g.should == 0.5
+              @color.b.should == 0.5
+              @color.alpha.should == 1.0 
+            
+              red = Color.new(153,0,0, :alpha => 0.25)
+              color = @white.layer(red)
+              color.r.should == 0.6*0.25 + 1.0*0.75
+              color.g.should == 0*0.25 + 1.0*0.75
+              color.b.should == 0*0.25 + 1.0*0.75
+            end
+          end
+        end
+        
+        describe 'alpha blending' do
+          it 'should be 1.0 if bottom layer is opaque' do 
+            color = @white.layer(@shadow)
+            color.alpha.should == 1.0
+          end
+          
+          it 'should be 1.0 if the top layer is opaque' do
+            color = @shadow.layer(@white)
+            color.alpha.should == 1.0
+          end   
+          
+          it 'should have an alpha greater than or equal to the composites' do
+            color = @dark_blue.layer(@shadow)
+            (color.alpha >= @dark_blue.alpha).should be_true
+            (color.alpha >= @shadow.alpha).should be_true
+          end
+          
+          it 'should calculate the blending of two alphas properly' do
+            color = @dark_blue.layer(@shadow)
+            color.alpha.should == 0.75 # 0.5 for the base color, plus 0.5 of the remaining transparency
+          end  
+        end 
       end
       
       describe 'mix' do

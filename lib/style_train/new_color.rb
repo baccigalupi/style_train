@@ -488,6 +488,17 @@ module StyleTrain
       color
     end
     
+    def layer(other)
+      color = self.dup
+      ratio = 1 - other.alpha
+      color.r = self.class.mix(color.r, other.r, ratio)
+      color.g = self.class.mix(color.g, other.g, ratio)
+      color.b = self.class.mix(color.b, other.b, ratio)
+      color.alpha = self.class.blend_alphas( color.alpha, other.alpha ) 
+      
+      color
+    end
+    
     def percent(value)
       self.mix_ratio = self.class.normalize_percentage(value)/100.0
       self
@@ -500,8 +511,20 @@ module StyleTrain
     end
     
     def self.mix(value_1, value_2, ratio)
+      puts "value_1 = #{value_1}"
+      puts "value_2 = #{value_2}"
+      puts "ratio = #{ratio}"
+      puts "mixture = #{value_1*(ratio) + value_2*(1-ratio)}"
+      puts "<hr>"
       value_1*(ratio) + value_2*(1-ratio)
     end
+    
+    def self.blend_alphas(first, second)
+      base, blender = first > second ? [first, second] : [second, first]
+      difference = 1.0 - base
+      base + difference * blender
+    end         
+    
     
     KEYWORD_MAP = {
       :aliceblue	=>	[240, 248, 255],
