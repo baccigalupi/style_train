@@ -2,7 +2,8 @@ module StyleTrain
   class NewColor
     attr_accessor :type, :r, :g, :b, 
       :hex, :hex_6, :h, :s, :l
-    attr_reader :alpha 
+    attr_reader :alpha
+    attr_writer :mix_ratio 
     
     def initialize(*args)
       if type = args.last.is_a?(Hash) && args.last[:type]
@@ -431,19 +432,75 @@ module StyleTrain
     COLDEST_HUE = 240/360.0
     WARMEST_HUE = 0.0
     
-    def warmer(value=10.degrees)
+    def rotate_in_temperature!(value)
       set_hsl
       value = self.class.normalize_hue(value)
-      color = self.dup
       unless [COLDEST_HUE, WARMEST_HUE].include?(h)
-        new_h = if h < COLDEST_HUE
-          [WARMEST_HUE, (h - value)].max.abs
-        else
-          [1.0-WARMEST_HUE, (h + value)].min.abs
-        end
-        color.rotate!((new_h - h)%1)
+        new_h = yield(value)
+        rotate!((new_h - h)%1)
       end
+      self
+    end
+    
+    def warmer!(value=10.degrees)
+      rotate_in_temperature!(value) do |v|
+        if h < COLDEST_HUE
+          [WARMEST_HUE, (h - v)].max.abs
+        else
+          [1.0-WARMEST_HUE, (h + v)].min.abs
+        end
+      end
+    end
+    
+    def cooler!(value=10.degrees)
+      rotate_in_temperature!(value) do |v|
+        new_h = if h < COLDEST_HUE
+          [COLDEST_HUE, (h + v)].min.abs
+        else
+          [COLDEST_HUE, (h - v)].max.abs
+        end
+      end
+    end
+    
+    def warmer(value=10.degrees)
+      color = self.dup
+      color.warmer!(value)
+    end
+
+    def cooler(value=10.degrees)
+      color = self.dup
+      color.cooler!(value)
+    end
+    
+    # COMBINING COLORS
+    def mix(other, ratio=nil)
+      ratio = 1-ratio if ratio
+      this_ratio = mix_ratio
+      ratio ||= this_ratio
+      other_ratio = other.mix_ratio
+      ratio ||=  other_ratio ? 1-other_ratio : 0.5
+      
+      color = self.dup
+      color.r = self.class.mix(color.r, other.r, ratio)
+      color.g = self.class.mix(color.g, other.g, ratio)
+      color.b = self.class.mix(color.b, other.b, ratio)
+      color.alpha = self.class.mix(color.alpha, other.alpha, ratio)
       color
+    end
+    
+    def percent(value)
+      self.mix_ratio = self.class.normalize_percentage(value)/100.0
+      self
+    end
+    
+    def mix_ratio
+      ratio = @mix_ratio
+      self.mix_ratio = nil
+      ratio
+    end
+    
+    def self.mix(value_1, value_2, ratio)
+      value_1*(ratio) + value_2*(1-ratio)
     end
     
     KEYWORD_MAP = {

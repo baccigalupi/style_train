@@ -6,10 +6,6 @@ KeywordColor = StyleTrain::KeywordColor unless defined?( KeywordColor )
 RGBcolor = StyleTrain::RGBcolor unless defined?( RGBcolor )
 
 describe Color do
-  
-  
-  
-  
   def build_color_type( color_class, args ) 
     color_class.new(:color => args)
   end

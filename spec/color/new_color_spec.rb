@@ -1011,34 +1011,149 @@ describe Color do
       end
       
       describe 'cooler' do
-        it 'does nothing if at the warmest hue'
-        it 'does nothing if at the coldest hue'
-        it 'defaults to rotating 10 degrees'
-        it 'takes an arbitrary amount'
-        it 'will not rotate past the warmest spot'
+        it 'does nothing if at the warmest hue' do
+          @red.rotate!(Color::WARMEST_HUE)
+          @red.cooler.should == @red
+        end
+        
+        it 'does nothing if at the coldest hue' do
+          @red.rotate!(Color::COLDEST_HUE)
+          @red.cooler.should == @red
+        end
+        
+        describe 'direction' do
+          before do
+            @red.rotate!(0.5)
+          end
+          
+          describe 'hue is between 0 degrees and 240 degrees' do
+            it 'defaults to rotating 10 degrees higher' do
+              @red.cooler.h.should be_within(TOLERANCE).of( 0.5 + 10/360.0 )
+            end
+            
+            it 'will not go below the coolest point' do
+              # currently at 180
+              @red.rotate!(60.degrees) # change to 235 degrees
+              @red.cooler.h.should be_within(TOLERANCE).of(Color::COLDEST_HUE) # adding 10 degrees should stop at 240
+            end
+            
+            it 'takes an custom rotation amount' do
+              @red.cooler(0.1).h.should be_within(TOLERANCE).of(0.5 + 0.1)
+            end
+          end
+          
+          describe "hue is between 240 degrees and 360" do
+            before do
+              @red.rotate! 0.25 # 270 degrees  = 0.75
+            end
+            
+            it 'defaults to rotating 10 degrees lower' do
+              @red.cooler.h.should be_within( TOLERANCE ).of( 0.75 - 10/360.0 )
+            end
+            
+            it 'takes a custom rotation amount' do
+              @red.cooler(0.05).h.should be_within( TOLERANCE ).of( 0.70 )
+            end
+            
+            it 'will not go lower than than 240 degress' do
+              @red.cooler(0.1).h.should be_within( TOLERANCE ).of( Color::COLDEST_HUE )
+            end
+          end
+        end
       end
     end
     
-    describe 'mixing' do
+    describe 'combining colors' do
       describe 'layering' do
+        
       end
       
-      describe 'averaging' do
+      describe 'mix' do
+        before :all do
+          @black = Color.new('#000')
+          @yellow = Color.new(:lightyellow)
+          @trans = Color.new(:lightyellow, :alpha => 0.5)
+        end
+        
+        it 'should not affect either color' do
+          black = @black.dup
+          yellow = @yellow.dup
+          @black.mix(@yellow)
+          @black.should == black
+          @yellow.should == yellow
+        end
+
+        it 'mixes half of each by default' do
+          color = @black.mix(@yellow)
+          color.r.should == (@yellow.r/2.0)
+          color.g.should == (@yellow.g/2.0)
+          color.b.should == (@yellow.b/2.0)
+          color.alpha.should == 1.0
+        end
+
+        it 'mixes alphas' do
+          color = @black.mix(@trans)
+          color.r.should == (@yellow.r/2.0)
+          color.g.should == (@yellow.g/2.0)
+          color.b.should == (@yellow.b/2.0)
+          color.alpha.should == 0.75
+        end
+        
+        it 'returns a copy, and does not alter the original' do
+          color = @black.mix(@trans)
+          color.should_not === @black
+          color.should_not === @trans
+        end
+
+        describe 'on another ratio' do
+          it 'will mix on a ratio' do
+            color = @black.mix(@trans, 0.25)
+            color.r.should == @trans.r*0.25
+            color.b.should == @trans.b*0.25
+            color.g.should == @trans.g*0.25
+            color.alpha.should == 1.0*0.75 + 0.5*0.25
+          end
+          
+          describe '#percent alternate syntax' do
+            it 'sets the mix ratio on the color being mixed in' do
+              @trans.percent(13)
+              @trans.mix_ratio.should == 0.13
+            end
+            
+            it 'will be used by the mix when applied to the first color' do
+              color = @black.percent(75).mix(@trans)
+              color.r.should == @trans.r*0.25
+              color.b.should == @trans.b*0.25
+              color.g.should == @trans.g*0.25
+              color.alpha.should == 1.0*0.75 + 0.5*0.25
+            end
+            
+            it 'will be used by the mix when applied to the second color' do
+              color = @black.mix(@trans.percent(25))
+              color.r.should == @trans.r*0.25
+              color.b.should == @trans.b*0.25
+              color.g.should == @trans.g*0.25
+              color.alpha.should == 1.0*0.75 + 0.5*0.25
+            end
+            
+            it 'consumes the mix ratio' do
+              color = @black.percent(75).mix(@trans.percent(75))
+              @black.mix_ratio.should be_nil
+              @trans.mix_ratio.should be_nil
+            end
+          end
+        end
       end
-      
-      describe 'mixing on another ratio' do
-      end
-      
-      describe 'multiplication' do
-      end
-      
-      describe 'division' do
-      end
+    end
+    
+    describe 'stepping' do
     end
   end
   
   describe 'rendering' do
     it 'renders as hex unless there it has some transparency'
+    it 'can set to render as another type by default'
+    it 'renders to the default method without transparency'
     it 'renders as rgba if there is transparency'
     it 'renders flattened to hex when there is a background'
     it 'renders to hsl (a)'
