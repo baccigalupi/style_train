@@ -1201,9 +1201,43 @@ describe Color do
           end
         end
       end
-    end
     
-    describe 'stepping' do
+      describe 'stepping' do
+        before :all do
+          @black = Color.new('#000')
+          @yellow = Color.new(:lightyellow, :alpha => 0.5)
+          @steps = @black.step(@yellow)
+        end
+
+        it 'returs an array' do
+          @steps.is_a?(Array).should be_true
+        end
+
+        it 'has 10 steps by default' do
+          @steps.size.should == 10
+        end
+
+        it 'first color should be the starting point (dupped)' do
+          @steps.first.should == @black
+          @steps.first.should_not === @black
+        end
+
+        it 'last color should be the last point (dupped)' do
+          @steps.last.should == @yellow
+          @steps.last.should_not === @yellow
+        end
+
+        it 'interior steps should be equally spaced colors between the two' do
+          mid = @steps[4]
+          mid.r.should == @yellow.r/2.0
+          mid.g.should == @yellow.g/2.0
+          mid.b.should == @yellow.b/2.0
+        end
+
+        it 'has takes optional number of steps' do
+          @black.step(@yellow, 5).size.should == 5
+        end
+      end
     end
   end
   

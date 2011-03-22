@@ -499,6 +499,18 @@ module StyleTrain
       color
     end
     
+    def step(end_color, steps=10)
+      start_color = self.dup
+      end_color = end_color.dup
+      array = [start_color]
+      (2..(steps-1)).each do |number|
+        ratio = 1 - (steps-number)/steps.to_f
+        array << start_color.mix(end_color, ratio)
+      end
+      array << end_color
+      array
+    end
+    
     def percent(value)
       self.mix_ratio = self.class.normalize_percentage(value)/100.0
       self
@@ -511,11 +523,6 @@ module StyleTrain
     end
     
     def self.mix(value_1, value_2, ratio)
-      puts "value_1 = #{value_1}"
-      puts "value_2 = #{value_2}"
-      puts "ratio = #{ratio}"
-      puts "mixture = #{value_1*(ratio) + value_2*(1-ratio)}"
-      puts "<hr>"
       value_1*(ratio) + value_2*(1-ratio)
     end
     
