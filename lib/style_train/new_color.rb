@@ -337,7 +337,7 @@ module StyleTrain
       self
     end
     
-    # transformations
+    # TRANSFORMATIONS --------------------------------------------
     def reset_for_shift
       self.hex = nil
       self.hex_6 = nil
@@ -472,7 +472,7 @@ module StyleTrain
       color.cooler!(value)
     end
     
-    # COMBINING COLORS
+    # COMBINING COLORS -------------------------------------------
     def mix(other, ratio=nil)
       ratio = 1-ratio if ratio
       this_ratio = mix_ratio
@@ -532,6 +532,67 @@ module StyleTrain
       base + difference * blender
     end         
     
+    
+    # RENDERING -----------------------------------------------------
+    def inspect
+      "#<#{self.class}:#{self.object_id} @alpha=#{self.alpha} @r=#{self.r} @g=#{self.g} @b=#{self.b}>"
+    end
+    
+    def render(as=self.class.render_as)
+      if as == :hsl
+        render_as_hsl
+      elsif as == :hsla
+        render_as_hsla
+      elsif as == :rgb
+        render_as_rgb
+      elsif as == :rgba
+        render_as_rgba
+      else
+        render_as_hex
+      end
+    end
+    
+    def render_as_hex
+      if alpha < 1
+        render_as_rgba
+      else
+        set_hex
+        "##{hex}"
+      end
+    end
+    
+    def render_as_rgb
+      if alpha < 1
+        render_as_rgba
+      else
+        "rgb(#{r*100}%, #{g*100}%, #{b*100}%)"
+      end
+    end
+    
+    def render_as_rgba
+      "rgba(#{r*100}%, #{g*100}%, #{b*100}%, #{alpha})"
+    end
+    
+    def render_as_hsl
+      if alpha < 1
+        render_as_hsla
+      else
+        set_hsl
+        "hsl(#{(h*360).round}, #{s*100}%, #{l*100}%)"
+      end
+    end
+    
+    def render_as_hsla
+      "hsla(#{(h*360).round}, #{s*100}%, #{l*100}%, #{alpha})"
+    end
+    
+    def self.render_as
+      @render_as || :hex
+    end
+    
+    def self.render_as=(value)
+      @render_as = value
+    end
     
     KEYWORD_MAP = {
       :aliceblue	=>	[240, 248, 255],

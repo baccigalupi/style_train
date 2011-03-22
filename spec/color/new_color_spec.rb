@@ -1242,17 +1242,161 @@ describe Color do
   end
   
   describe 'rendering' do
-    it 'renders as hex unless there it has some transparency'
-    it 'can set to render as another type by default'
-    it 'renders to the default method without transparency'
-    it 'renders as rgba if there is transparency'
-    it 'renders flattened to hex when there is a background'
-    it 'renders to hsl (a)'
+    before do
+      Color.render_as = nil
+    end
     
-    describe 'keyword' do
-      it 'renders to keyword'
-      it 'renders to hex if a keyword cannot be found and there is not transparency'
-      it 'renders to rgba if a keyword cannot be found and there is transparency'
+    it 'inspects' do
+      color = Color.new('#000')
+      color.inspect.should == "#<#{color.class}:#{color.object_id} @alpha=#{color.alpha} @r=#{color.r} @g=#{color.g} @b=#{color.b}>"
+    end
+    
+    describe 'class level render_as' do
+      it 'defaults to :hex' do
+        Color.render_as.should == :hex
+      end
+      
+      it 'can be set' do
+        Color.render_as = :foo
+        Color.render_as.should == :foo
+      end
+    end
+    
+    describe '#render' do
+      it 'renders to the default render_as method without transparency' do
+        color = Color.new(0,0,0)
+        color.render.should == '#000000'
+      end
+    
+      it 'renders as rgba if there is transparency' do
+        color = Color.new(0.5, 0.5, 0.5, :alpha => 0.5)
+        color.render.should == "rgba(50.0%, 50.0%, 50.0%, 0.5)"
+      end
+      
+      describe 'specific render methods' do
+        describe ':hex' do
+          it 'will render as :hex if alpha is 1' do
+            Color.render_as = :rgb
+            color = Color.new(0,0,0)
+            color.render(:hex).should == '#000000'
+          end
+          
+          it 'will render as :rgba if alpha is less than 1' do
+            Color.render_as = :hsl
+            color = Color.new(0,0,0, :alpha => 0.9)
+            color.render(:hex).should == "rgba(0.0%, 0.0%, 0.0%, 0.9)"
+          end
+          
+          it 'will render as :hex if render_as is set that way' do
+            Color.render_as = :hex
+            color = Color.new(0,0,0)
+            color.render.should == '#000000'
+          end
+          
+          it 'will render as :rgba if render_as is set that way but alpha is less than 1' do
+            Color.render_as = :hex
+            color = Color.new(0,0,0, :alpha => 0.9)
+            color.render.should == "rgba(0.0%, 0.0%, 0.0%, 0.9)"
+          end
+        end
+        
+        describe ':hsl' do
+          it 'will render as :hsl from #render if the alpha is 1' do
+            color = Color.new(0.5, 0.5, 0.5)
+            color.set_hsl
+            color.render(:hsl).should == "hsl(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%)"
+          end
+          
+          it 'will render as hsla from #render if the alpha is less than 1' do
+            color = Color.new(0.5, 0.5, 0.5, :alpha => 0.75)
+            color.set_hsl
+            color.render(:hsl).should == "hsla(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%, 0.75)"
+          end
+          
+          it "will render this way when the render_as is set to it and alpha is 1" do
+            Color.render_as = :hsl
+            color = Color.new(0.5, 0.5, 0.5)
+            color.set_hsl
+            color.render.should == "hsl(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%)"
+          end
+          
+          it 'wil render as hsla with a render_as of :hsl if the alpha is less than 1' do
+            Color.render_as = :hsl
+            color = Color.new(0.5, 0.5, 0.5, :alpha => 0.75)
+            color.set_hsl
+            color.render.should == "hsla(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%, 0.75)"
+          end
+        end
+        
+        describe ':hsla' do
+          it 'will render as :hsla if alpha is 1' do
+            color = Color.new(0.5, 0.5, 0.5)
+            color.set_hsl
+            color.render(:hsla).should == "hsla(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%, 1.0)"
+          end
+          
+          it 'will render as :hsla if alpha is less than 1' do
+            color = Color.new(0.5, 0.5, 0.5, :alpha => 0.2)
+            color.set_hsl
+            color.render(:hsla).should == "hsla(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%, 0.2)"
+          end
+          
+          it 'will render as :hsla when the Colol render_as is set that way' do
+            Color.render_as = :hsla
+            color = Color.new(0.5, 0.5, 0.5)
+            color.set_hsl
+            color.render.should == "hsla(#{(color.h*360).round}, #{color.s*100}%, #{color.l*100}%, 1.0)"
+          end
+        end
+        
+        describe ':rgb' do
+          it 'will render as :rgb from #render if the alpha is 1' do
+            color = Color.new(0.5, 0.5, 0.5)
+            color.render(:rgb).should == "rgb(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%)"
+          end
+          
+          it 'will render as rgba from #render if the alpha is less than 1' do
+            color = Color.new(0.5, 0.5, 0.5, :alpha => 0.75)
+            color.render(:rgb).should == "rgba(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%, 0.75)"
+          end
+          
+          it "will render this way when the render_as is set to it and alpha is 1" do
+            Color.render_as = :rgb
+            color = Color.new(0.5, 0.5, 0.5)
+            color.render.should == "rgb(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%)"
+          end
+          
+          it 'wil render as rgba with a render_as of :rgb if the alpha is less than 1' do
+            Color.render_as = :rgb
+            color = Color.new(0.5, 0.5, 0.5, :alpha => 0.75)
+            color.render(:rgb).should == "rgba(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%, 0.75)"
+          end
+        end
+        
+        describe ':rgba' do
+          it 'will render as :rgba if alpha is 1' do
+            color = Color.new(0.5, 0.5, 0.5)
+            color.set_rgb
+            color.render(:rgba).should == "rgba(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%, 1.0)"
+          end
+          
+          it 'will render as :rgba if alpha is less than 1' do
+            color = Color.new(0.5, 0.5, 0.5, :alpha => 0.2)
+            color.set_rgb
+            color.render(:rgba).should == "rgba(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%, 0.2)"
+          end
+          
+          it 'will render as :rgba when the Colol render_as is set that way' do
+            Color.render_as = :rgba
+            color = Color.new(0.5, 0.5, 0.5)
+            color.set_rgb
+            color.render.should == "rgba(#{color.r*100}%, #{color.g*100}%, #{color.b*100}%, 1.0)"
+          end
+        end
+      end
+      
+      describe 'flattened' do
+      end
     end
   end
 end
