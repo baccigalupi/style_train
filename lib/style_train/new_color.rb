@@ -255,6 +255,8 @@ module StyleTrain
     end
     
     # COMPARITORS ------------------------------------------------------
+    COMPARE_TOLERANCE = 0.001
+    
     def ==(other)
       self =~ other &&
       self.alpha == other.alpha
@@ -265,9 +267,9 @@ module StyleTrain
     end
     
     def =~(other)
-      self.r == other.r &&
-      self.g == other.g &&
-      self.b == other.b
+      (self.r - other.r).abs < COMPARE_TOLERANCE &&
+      (self.g - other.g).abs < COMPARE_TOLERANCE&&
+      (self.b - other.b).abs < COMPARE_TOLERANCE
     end
     
     # CONVERSIONS ------------------------------------------------------
@@ -328,7 +330,6 @@ module StyleTrain
     end
     
     def hsl_to_rgb
-      self.type = :rgb
       self.hex = nil
       self.hex_6 = nil
       build_rgb_from_hsl
@@ -336,11 +337,17 @@ module StyleTrain
     end
     
     # transformations
-    def shift!(value)
-      value = self.class.normalize_modifier(value) 
+    def reset_for_shift
       self.hex = nil
       self.hex_6 = nil
       set_hsl unless :type == :hsl
+    end
+    
+    def shift!(value)
+      reset_for_shift
+      value = value/100.0 if value.is_a?(Integer)
+      value = self.class.normalize_percentage(value)/100.0 if value.is_a?(String)
+      value = self.class.normalize_ratio(value) 
       yield(value)
       hsl_to_rgb
     end
@@ -386,10 +393,57 @@ module StyleTrain
     alias :desaturate :dull
     alias :desaturate! :dull!
     
-    def self.normalize_modifier(value)
-      value = value/100.0 if value.is_a?(Integer)
-      value = normalize_percentage(value)/100.0 if value.is_a?(String)
-      value = normalize_ratio(value)
+    def shift_hue!(value)
+      reset_for_shift
+      value = self.class.normalize_hue(value)
+      yield(value)
+      hsl_to_rgb
+    end
+    
+    def rotate(value=10.degrees)
+      color = self.dup
+      color.rotate!(value)
+    end
+    
+    def rotate!(value=10.degrees)
+      shift_hue!(value) {|v| self.h = (v + h) % 1 }
+    end
+    
+    def compliment
+      rotate(0.5)
+    end
+    
+    def dial(divisions=3, offset = 0.0)
+      divisions = divisions.to_i
+      offset = self.class.normalize_hue(offset)
+      set = []
+      (1..divisions).each do |n|
+        amount = (offset + (n-1)/divisions.to_f)%1
+        set << rotate(amount)
+      end
+      set
+    end
+    
+    def triangulate(offset = 0.0)
+      dial(3, offset)
+    end
+    
+    COLDEST_HUE = 240/360.0
+    WARMEST_HUE = 0.0
+    
+    def warmer(value=10.degrees)
+      set_hsl
+      value = self.class.normalize_hue(value)
+      color = self.dup
+      unless [COLDEST_HUE, WARMEST_HUE].include?(h)
+        new_h = if h < COLDEST_HUE
+          [WARMEST_HUE, (h - value)].max.abs
+        else
+          [1.0-WARMEST_HUE, (h + value)].min.abs
+        end
+        color.rotate!((new_h - h)%1)
+      end
+      color
     end
     
     KEYWORD_MAP = {

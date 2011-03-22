@@ -2,6 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 Color = StyleTrain::NewColor unless defined?(Color)
 describe Color do
+  TOLERANCE = 0.009
+  
   describe 'initialization' do
     describe 'auto-detection' do
       it 'raises an error if autodetection fails' do
@@ -166,7 +168,7 @@ describe Color do
         
           color = Color.new(210.degrees, 65.percent, 20.percent)
           color.r.should == 0.07
-          color.g.should be_within(0.001).of(0.2)
+          color.g.should be_within(TOLERANCE).of(0.2)
           color.b.should == 0.33
         end
       end
@@ -219,16 +221,16 @@ describe Color do
         it 'will recognize the type even if hue is within byte range' do
           color = Color.new(220, 127, 127, :type => :hsl)
           color.type.should == :hsl
-          color.r.should be_within(0.01).of(0.25)
-          color.g.should be_within(0.01).of(0.416)
-          color.b.should be_within(0.01).of(0.75)
+          color.r.should be_within(TOLERANCE).of(0.25)
+          color.g.should be_within(TOLERANCE).of(0.416)
+          color.b.should be_within(TOLERANCE).of(0.75)
         end
         
         it 'accepts ratios for hue' do
           color = Color.new(0.611111, 0.5, 0.5, :type => :hsl)
           color.type.should == :hsl
           color.r.should == 0.25
-          color.g.should be_within(0.001).of(0.416)
+          color.g.should be_within(TOLERANCE).of(0.416)
           color.b.should == 0.75
         end
         
@@ -236,7 +238,7 @@ describe Color do
           color = Color.new(61.1111.percent, 50.percent, 50.percent, :type => :hsl)
           color.type.should == :hsl
           color.r.should == 0.25
-          color.g.should be_within(0.001).of(0.416)
+          color.g.should be_within(TOLERANCE).of(0.416)
           color.b.should == 0.75
         end
       end
@@ -476,6 +478,7 @@ describe Color do
     
     describe 'degrees' do
       it 'should return a number between 0 and 359 when given such a number' do
+        Color.normalize_degrees(30).should == 30/360.0
         Color.normalize_degrees(42).should == 42/360.0
       end
       
@@ -556,17 +559,17 @@ describe Color do
       end
     
       it 'converts adds hsl value' do
-        @red.h.should be_within(0.01).of(Color.normalize_degrees(@red_values[:hsl][0]))
-        @red.s.should be_within(0.01).of( @red_values[:hsl][1])
-        @red.l.should be_within(0.01).of(@red_values[:hsl][2])
+        @red.h.should be_within(TOLERANCE).of(Color.normalize_degrees(@red_values[:hsl][0]))
+        @red.s.should be_within(TOLERANCE).of( @red_values[:hsl][1])
+        @red.l.should be_within(TOLERANCE).of(@red_values[:hsl][2])
       
-        @green.h.should be_within(0.01).of(Color.normalize_degrees(@green_values[:hsl][0]))
-        @green.s.should be_within(0.01).of( @green_values[:hsl][1])
-        @green.l.should be_within(0.01).of(@green_values[:hsl][2])
+        @green.h.should be_within(TOLERANCE).of(Color.normalize_degrees(@green_values[:hsl][0]))
+        @green.s.should be_within(TOLERANCE).of( @green_values[:hsl][1])
+        @green.l.should be_within(TOLERANCE).of(@green_values[:hsl][2])
       
-        @blue.h.should be_within(0.01).of(Color.normalize_degrees(@blue_values[:hsl][0]))
-        @blue.s.should be_within(0.01).of( @blue_values[:hsl][1])
-        @blue.l.should be_within(0.01).of(@blue_values[:hsl][2])
+        @blue.h.should be_within(TOLERANCE).of(Color.normalize_degrees(@blue_values[:hsl][0]))
+        @blue.s.should be_within(TOLERANCE).of( @blue_values[:hsl][1])
+        @blue.l.should be_within(TOLERANCE).of(@blue_values[:hsl][2])
       end
     end
     
@@ -609,13 +612,9 @@ describe Color do
       end
       
       it 'resets the r, g, b values from h, s, l' do
-        @red.r.should be_within(0.01).of(143/255.0)
-        @red.g.should be_within(0.01).of(36/255.0)
-        @red.b.should be_within(0.01).of(36/255.0)
-      end
-      
-      it 'sets the type to :rgb' do
-        @red.type.should == :rgb
+        @red.r.should be_within(TOLERANCE).of(143/255.0)
+        @red.g.should be_within(TOLERANCE).of(36/255.0)
+        @red.b.should be_within(TOLERANCE).of(36/255.0)
       end
       
       it 'clears the hex' do
@@ -626,29 +625,29 @@ describe Color do
   end
 
   describe 'modification' do
+    before do
+      @red_values = {
+        :rgb => [100, 25, 25],
+        :hex => ['641919', 0x641919],
+        :hsl => [Color.normalize_degrees(0.degrees), 0.6, 0.25]
+      }
+      @red = Color.new(*@red_values[:rgb])
+    end
+    
     describe 'shift' do
-      before do
-        @red_values = {
-          :rgb => [100, 25, 25],
-          :hex => ['641919', 0x641919],
-          :hsl => [0.degrees, 0.6, 0.25]
-        }
-        @red = Color.new(*@red_values[:rgb])
-      end
-      
       describe 'lighten!' do
         before do
           @red.lighten!
         end
         
         it 'adds 10% to the l value by default' do
-          @red.l.should be_within(0.01).of(@red_values[:hsl][2] + 0.1)
+          @red.l.should be_within(TOLERANCE).of(@red_values[:hsl][2] + 0.1)
         end
         
         it 'recalculates the rgb' do
-          @red.r.should be_within(0.01).of(143/255.0)
-          @red.g.should be_within(0.01).of(36/255.0)
-          @red.b.should be_within(0.01).of(36/255.0)
+          @red.r.should be_within(TOLERANCE).of(143/255.0)
+          @red.g.should be_within(TOLERANCE).of(36/255.0)
+          @red.b.should be_within(TOLERANCE).of(36/255.0)
         end
         
         it 'takes a percentage argument and adds that from the l' do
@@ -684,13 +683,13 @@ describe Color do
         
         it 'should not affect the originating color' do
           @red.type.should == :rgb
-          @red.r.should be_within(0.01).of(0.4)
+          @red.r.should be_within(TOLERANCE).of(0.4)
         end
         
         it 'should return a transformed object' do
-          @less_red.r.should be_within(0.01).of(143/255.0)
-          @less_red.g.should be_within(0.01).of(36/255.0)
-          @less_red.b.should be_within(0.01).of(36/255.0)
+          @less_red.r.should be_within(TOLERANCE).of(143/255.0)
+          @less_red.g.should be_within(TOLERANCE).of(36/255.0)
+          @less_red.b.should be_within(TOLERANCE).of(36/255.0)
         end
       end
       
@@ -700,13 +699,13 @@ describe Color do
         end
         
         it 'makes subtracts 10% to the l value by default' do
-          @red.l.should be_within(0.01).of(@red_values[:hsl][2] - 0.1)
+          @red.l.should be_within(TOLERANCE).of(@red_values[:hsl][2] - 0.1)
         end
         
         it 'recalculates the rgb' do
-          @red.r.should be_within(0.01).of(61/255.0)
-          @red.g.should be_within(0.01).of(15/255.0)
-          @red.b.should be_within(0.01).of(15/255.0)
+          @red.r.should be_within(TOLERANCE).of(61/255.0)
+          @red.g.should be_within(TOLERANCE).of(15/255.0)
+          @red.b.should be_within(TOLERANCE).of(15/255.0)
         end
         
         it 'takes a percentage argument and subtracts that from the l' do
@@ -729,13 +728,13 @@ describe Color do
         
         it 'should not affect the originating color' do
           @red.type.should == :rgb
-          @red.r.should be_within(0.01).of(0.4)
+          @red.r.should be_within(TOLERANCE).of(0.4)
         end
         
         it 'should return a transformed object' do
-          @darker_red.r.should be_within(0.01).of(61/255.0)
-          @darker_red.g.should be_within(0.01).of(15/255.0)
-          @darker_red.b.should be_within(0.01).of(15/255.0)
+          @darker_red.r.should be_within(TOLERANCE).of(61/255.0)
+          @darker_red.g.should be_within(TOLERANCE).of(15/255.0)
+          @darker_red.b.should be_within(TOLERANCE).of(15/255.0)
         end
       end
     
@@ -745,13 +744,13 @@ describe Color do
         end
         
         it 'adds 10% to the s value by default' do
-          @red.s.should be_within(0.01).of(@red_values[:hsl][1] + 0.1)
+          @red.s.should be_within(TOLERANCE).of(@red_values[:hsl][1] + 0.1)
         end
         
         it 'recalculates the rgb' do
-          @red.r.should be_within(0.01).of(108/255.0)
-          @red.g.should be_within(0.01).of(19/255.0)
-          @red.b.should be_within(0.01).of(19/255.0)
+          @red.r.should be_within(TOLERANCE).of(108/255.0)
+          @red.g.should be_within(TOLERANCE).of(19/255.0)
+          @red.b.should be_within(TOLERANCE).of(19/255.0)
         end
         
         it 'takes a percentage argument and adds that from the s' do
@@ -763,7 +762,7 @@ describe Color do
         it 'takes a ratio argument' do
           s = @red.s
           @red.saturate!(0.21)
-          @red.s.should be_within(0.01).of(s + 0.21)
+          @red.s.should be_within(TOLERANCE).of(s + 0.21)
         end
         
         it 'assumes integers are percentages' do
@@ -792,13 +791,13 @@ describe Color do
         
         it 'should not affect the originating color' do
           @red.type.should == :rgb
-          @red.r.should be_within(0.01).of(0.4)
+          @red.r.should be_within(TOLERANCE).of(0.4)
         end
         
         it 'should return a transformed object' do
-          @brighter_red.r.should be_within(0.01).of(108/255.0)
-          @brighter_red.g.should be_within(0.01).of(19/255.0)
-          @brighter_red.b.should be_within(0.01).of(19/255.0)
+          @brighter_red.r.should be_within(TOLERANCE).of(108/255.0)
+          @brighter_red.g.should be_within(TOLERANCE).of(19/255.0)
+          @brighter_red.b.should be_within(TOLERANCE).of(19/255.0)
         end
       end
       
@@ -808,31 +807,31 @@ describe Color do
         end
         
         it 'adds 10% to the s value by default' do
-          @red.s.should be_within(0.01).of(@red_values[:hsl][1] - 0.1)
+          @red.s.should be_within(TOLERANCE).of(@red_values[:hsl][1] - 0.1)
         end
         
         it 'recalculates the rgb' do
-          @red.r.should be_within(0.01).of(96/255.0)
-          @red.g.should be_within(0.01).of(32/255.0)
-          @red.b.should be_within(0.01).of(32/255.0)
+          @red.r.should be_within(TOLERANCE).of(96/255.0)
+          @red.g.should be_within(TOLERANCE).of(32/255.0)
+          @red.b.should be_within(TOLERANCE).of(32/255.0)
         end
         
         it 'takes a percentage argument and adds that from the s' do
           s = @red.s
           @red.dull!(30.percent)
-          @red.s.should be_within(0.01).of(s - 0.30)
+          @red.s.should be_within(TOLERANCE).of(s - 0.30)
         end
         
         it 'takes a ratio argument' do
           s = @red.s
           @red.dull!(0.21)
-          @red.s.should be_within(0.01).of(s - 0.21)
+          @red.s.should be_within(TOLERANCE).of(s - 0.21)
         end
         
         it 'assumes integers are percentages' do
           s = @red.s
           @red.dull!(20)
-          @red.s.should be_within(0.01).of(s - 0.2)
+          @red.s.should be_within(TOLERANCE).of(s - 0.2)
           @red.dull!(80)
           @red.s.should == 0.0
         end
@@ -855,14 +854,168 @@ describe Color do
         
         it 'should not affect the originating color' do
           @red.type.should == :rgb
-          @red.r.should be_within(0.01).of(0.4)
+          @red.r.should be_within(TOLERANCE).of(0.4)
         end
         
         it 'should return a transformed object' do
-          @dull_red.r.should be_within(0.01).of(96/255.0)
-          @dull_red.g.should be_within(0.01).of(32/255.0)
-          @dull_red.b.should be_within(0.01).of(32/255.0)
+          @dull_red.r.should be_within(TOLERANCE).of(96/255.0)
+          @dull_red.g.should be_within(TOLERANCE).of(32/255.0)
+          @dull_red.b.should be_within(TOLERANCE).of(32/255.0)
         end
+      end
+    end
+    
+    describe 'rotate' do
+      describe 'arbitrary' do
+        it 'defaults to 10 degrees' do
+          @new = @red.rotate
+          @new.h.should be_within(TOLERANCE).of(10/360.0)
+        end
+        
+        it 'takes other positive degree values' do
+          @new = @red.rotate(30.degrees)
+          @new.h.should be_within(TOLERANCE).of(30/360.0 )
+        end
+        
+        it 'takes negative degrees' do
+          @new = @red.rotate(-20.degrees)
+          @new.h.should be_within(TOLERANCE).of((360-20)/360.0 )
+        end
+        
+        it 'will rotate beyond end points' do
+          @new = @red.rotate(300.degrees)
+          @new.h.should be_within(TOLERANCE).of(300/360.0)
+          
+          @new.rotate!(100.degrees)
+          @new.h.should be_within(TOLERANCE).of(40/360.0)
+        end
+        
+        it 'takes ratios' do
+          @red.rotate(0.5).h.should be_within(TOLERANCE).of(0.5)
+        end
+        
+        it 'calculates the rgb values' do
+          @new = @red.rotate(0.5)
+          @new.r.should be_within(TOLERANCE).of(26/255.0)
+          @new.g.should be_within(TOLERANCE).of(102/255.0)
+          @new.b.should be_within(TOLERANCE).of(102/255.0)
+        end
+        
+        it 'returns a new color object' do
+          @new = @red.rotate(0.5)
+          @new.should_not == @red
+        end
+        
+        it 'does not modify the existing object' do
+          @red.rotate(0.5)
+          @red.type.should == :rgb
+          @red.r.should be_within(TOLERANCE).of(@red_values[:rgb][0]/255.0)
+        end
+        
+        it 'has a ! method that modifies self' do
+          @red.rotate!(0.5)
+          @red.type.should == :hsl
+          @red.r.should be_within(TOLERANCE).of(26/255.0)
+        end
+      end
+      
+      describe 'compliment' do
+        it 'rotates half way around' do
+          @red.compliment.should == @red.rotate(0.5)
+        end
+      end
+      
+      describe '#dial' do
+        it 'gives triangular colors' do
+          @red.triangulate.should == [@red, @red.rotate(120.degrees), @red.rotate(240.degrees)]
+        end
+        
+        it 'gives offset triangular colors' do
+          dial = @red.triangulate(1/6.0)
+          dial[0].should == @red.rotate(1/6.0)
+          dial[1].should == @red.rotate(0.5)
+          dial[2].should == @red.rotate(5/6.0)
+        end
+        
+        it 'dialing allows dividing by any integer' do
+          @red.dial(5).should == [
+            @red,
+            @red.rotate((360/5.0).degrees),
+            @red.rotate((2*360/5.0).degrees),
+            @red.rotate((3*360/5.0).degrees),
+            @red.rotate((4*360/5.0).degrees)
+          ]
+        end
+        
+        it 'dailing allows offset too' do
+          @red.dial(5, 120.degrees).should == [
+            @red.rotate(120.degrees),
+            @red.rotate((120 + 360/5.0).degrees),
+            @red.rotate((120 + 2*360/5.0).degrees),
+            @red.rotate((120 + 3*360/5.0).degrees),
+            @red.rotate((120 + 4*360/5.0).degrees)
+          ]
+        end
+      end
+      
+      describe 'warmer' do
+        it 'does nothing if at the warmest hue' do
+          @red.rotate!(Color::WARMEST_HUE)
+          @red.warmer.should == @red
+        end
+        
+        it 'does nothing if at the coldest hue' do
+          @red.rotate!(Color::COLDEST_HUE)
+          @red.warmer.should == @red
+        end
+        
+        describe 'direction' do
+          before do
+            @red.rotate!(0.5)
+          end
+          
+          describe 'hue is between 0 degrees and 240 degrees' do
+            it 'defaults to rotating 10 degrees lower' do
+              @red.warmer.h.should be_within(TOLERANCE).of( 0.5 - 10/360.0 )
+            end
+            
+            it 'will not go below the warmest point' do
+              # currently at 180
+              @red.rotate!(-175.degrees) # to 5 degrees
+              @red.warmer.h.should be_within(TOLERANCE).of(0.0) # subtract 10 degrees, should stop at 0
+            end
+            
+            it 'takes an custom rotation amount' do
+              @red.warmer(0.4).h.should be_within(TOLERANCE).of(0.5 - 0.4)
+            end
+          end
+          
+          describe "hue is between 240 degrees and 360" do
+            before do
+              @red.rotate! 0.25 # 270 degrees 
+            end
+            
+            it 'defaults to rotating 10 degrees higher' do
+              @red.warmer.h.should be_within( TOLERANCE ).of( 0.75 + 10/360.0 )
+            end
+            
+            it 'takes a custom rotation amount' do
+              @red.warmer(0.2).h.should be_within( TOLERANCE ).of( 0.95 )
+            end
+            
+            it 'will not go higher than 360' do
+              @red.warmer(0.3).h.should be_within( TOLERANCE ).of( 0.0 )
+            end
+          end
+        end
+      end
+      
+      describe 'cooler' do
+        it 'does nothing if at the warmest hue'
+        it 'does nothing if at the coldest hue'
+        it 'defaults to rotating 10 degrees'
+        it 'takes an arbitrary amount'
+        it 'will not rotate past the warmest spot'
       end
     end
     
