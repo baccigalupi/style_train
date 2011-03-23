@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{style_train}
-  s.version = "0.3.2"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kane Baccigalupi"]
-  s.date = %q{2011-03-03}
+  s.date = %q{2011-03-23}
   s.description = %q{style_train builds CSS using pure Ruby, not a DSL interpreted via Ruby. This allows inheritance, modules, instance level calculations and all the goodness Ruby can offer.}
   s.email = %q{baccigalupi@gmail.com}
   s.extra_rdoc_files = [
@@ -22,11 +22,6 @@ Gem::Specification.new do |s|
     "VERSION",
     "lib/style_train.rb",
     "lib/style_train/color.rb",
-    "lib/style_train/color_types/color_type.rb",
-    "lib/style_train/color_types/hex_color.rb",
-    "lib/style_train/color_types/hsl_color.rb",
-    "lib/style_train/color_types/keyword_color.rb",
-    "lib/style_train/color_types/rgb_color.rb",
     "lib/style_train/sheet.rb",
     "lib/style_train/style.rb",
     "lib/style_train/support/gnash.rb",
@@ -38,11 +33,7 @@ Gem::Specification.new do |s|
     "research/contexting.rb",
     "research/overview.txt",
     "research/stylesheet.txt",
-    "spec/color/color_spec.rb",
-    "spec/color/color_type_spec.rb",
-    "spec/color/hex_color_spec.rb",
-    "spec/color/keyword_color_spec.rb",
-    "spec/color/rgb_color_spec.rb",
+    "spec/color_spec.rb",
     "spec/generated_files/.gitkeep",
     "spec/integration_spec.rb",
     "spec/numbers_spec.rb",
@@ -60,11 +51,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{style_train builds CSS with Ruby}
   s.test_files = [
-    "spec/color/color_spec.rb",
-    "spec/color/color_type_spec.rb",
-    "spec/color/hex_color_spec.rb",
-    "spec/color/keyword_color_spec.rb",
-    "spec/color/rgb_color_spec.rb",
+    "spec/color_spec.rb",
     "spec/integration_spec.rb",
     "spec/numbers_spec.rb",
     "spec/sheet_spec.rb",
