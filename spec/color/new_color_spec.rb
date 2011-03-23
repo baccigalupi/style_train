@@ -1064,6 +1064,12 @@ describe Color do
     end
     
     describe 'combining colors' do
+      before :all do
+        @black = Color.new('#000')
+        @yellow = Color.new(:lightyellow)
+        @trans = Color.new(:lightyellow, :alpha => 0.5)
+      end
+      
       describe 'layering' do
         before do
           @white = Color.new('#FFF')
@@ -1126,12 +1132,6 @@ describe Color do
       end
       
       describe 'mix' do
-        before :all do
-          @black = Color.new('#000')
-          @yellow = Color.new(:lightyellow)
-          @trans = Color.new(:lightyellow, :alpha => 0.5)
-        end
-        
         it 'should not affect either color' do
           black = @black.dup
           yellow = @yellow.dup
@@ -1199,6 +1199,30 @@ describe Color do
               @trans.mix_ratio.should be_nil
             end
           end
+        end
+      end
+    
+      describe 'flatten' do
+        it 'does not affect colors with an alpha of 1' do
+          @black.background = Color.new(:white)
+          color = @black.flatten
+          color.should == @black
+        end
+        
+        it 'layers the transparent color onto the background' do
+          @yellow.background = @black
+          color = @yellow.flatten
+          layered = @black.layer(@yellow)
+          color.should == layered
+        end
+        
+        it 'ignores the alpha of the background' do
+          background = Color.new(:white, :alpha => 0.5)
+          @yellow.background = background
+          color = @yellow.flatten
+          
+          background.alpha = 1.0
+          color.should == background.layer(@yellow)
         end
       end
     
@@ -1396,6 +1420,23 @@ describe Color do
       end
       
       describe 'flattened' do
+        it 'will render as the render_as type when opaque' do
+          Color.render_as = :hsl
+          color = Color.new(:black)
+          color.render(:flat).should == Color.new(:black).render_as_hsl
+        end
+        
+        it 'will flatten the color before rendering' do
+          Color.render_as = :rgb
+          color = Color.new(:black, :alpha => 0.5)
+          color.render(:flat).should == Color.new(0.5,0.5,0.5).render_as_rgb
+        end
+        
+        it 'will render as the non-alpha type even with alhpa' do
+          Color.render_as = :hex
+          color = Color.new(:black, :alpha => 0.5)
+          color.render(:flat).should == Color.new(0.5,0.5,0.5).render_as_hex
+        end
       end
     end
   end

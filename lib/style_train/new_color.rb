@@ -511,6 +511,11 @@ module StyleTrain
       array
     end
     
+    def flatten
+      background.alpha = 1.0
+      background.layer(self)
+    end
+    
     def percent(value)
       self.mix_ratio = self.class.normalize_percentage(value)/100.0
       self
@@ -547,9 +552,16 @@ module StyleTrain
         render_as_rgb
       elsif as == :rgba
         render_as_rgba
+      elsif as == :flat
+        render_as_flat
       else
         render_as_hex
       end
+    end
+    
+    def render_as_flat
+      color = flatten
+      color.render
     end
     
     def render_as_hex
