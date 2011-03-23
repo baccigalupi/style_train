@@ -9,12 +9,12 @@ describe ThemedSheet do
   
   FooeyTheme.new(:default, {
     :foo => '#666',
-    :bar => 'white'
+    :bar => :white
   })
   
   FooeyTheme.new(:inverted, {
     :foo => '#CCC',
-    :bar => 'black'
+    :bar => :black
   })
   
   class FooeySheet <  ThemedSheet

@@ -16,15 +16,7 @@ module StyleTrain
 end
 
 # The color load!
-require 'style_train/color_types/color_type'
-require 'style_train/color_types/rgb_color'
-require 'style_train/color_types/hsl_color'
-require 'style_train/color_types/keyword_color'
-require 'style_train/color_types/hex_color'
 require "style_train/color"
-require 'style_train/new_color'
-
-# Big Picture Stuff, sheets, themes, etc
 require 'style_train/style'
 require "style_train/sheet"
 require 'style_train/theme'

@@ -1,6 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-Color = StyleTrain::NewColor unless defined?(Color)
+Color = StyleTrain::Color unless defined?(Color)
 describe Color do
   TOLERANCE = 0.009
   
@@ -1437,6 +1437,10 @@ describe Color do
           color = Color.new(:black, :alpha => 0.5)
           color.render(:flat).should == Color.new(0.5,0.5,0.5).render_as_hex
         end
+      end
+    
+      it 'aliases to #to_s' do
+        Color.new(:black).render(:rgba).should == Color.new(:black).to_s(:rgba)
       end
     end
   end
