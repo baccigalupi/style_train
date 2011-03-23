@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 Sheet = StyleTrain::Sheet unless defined?( Sheet )
+Color = StyleTrain::Color unless defined?( Color )
 
 describe Sheet do
   class StyleSheet < StyleTrain::Sheet
@@ -194,7 +195,7 @@ CSS
     
     describe 'background' do
       it ':color will create a background-color property' do
-        @sheet.background(:color => :white).should include 'background-color: white;'
+        @sheet.background(:color => :white).should include "background-color: #{Color.new(:white)};"
       end
       
       it ':image will create a background-image property' do
@@ -584,7 +585,7 @@ CSS
     
     describe 'duplicate declarations' do
       it 'color' do
-        @sheet.color(StyleTrain::Color.new('#456')).should include 'color: #456'
+        @sheet.color(StyleTrain::Color.new('#456')).should include 'color: #445566'
       end
       
       it 'overflow' do
@@ -621,10 +622,23 @@ CSS
         @sheet.visibility(:hidden).should include 'visibility: hidden'
       end
       
-      it 'opacity' do
-        str = @sheet.opacity(0.5)
-        str.should include 'opacity: 0.5'
-        str.should include 'filter: alpha(opacity=50)'
+      describe 'opacity' do
+        it 'has a simple declaration' do
+          str = @sheet.opacity(0.5)
+          str.should include 'opacity: 0.5'
+          str.should_not include 'filter: alpha(opacity=50)' # IE creates a gray box with alpha
+        end
+      
+        it 'has a separate alpha declaration' do
+          str = @sheet.alpha(50)
+          str.should include 'filter: alpha(opacity=50)'
+        end
+        
+        it '#opacity can take :alpha option as an argument' do
+          str = @sheet.opacity(0.5, :alpha => true)
+          str.should include 'opacity: 0.5'
+          str.should include 'filter: alpha(opacity=50)'
+        end
       end
     end
   end
@@ -810,11 +824,11 @@ CSS
     it 'works' do
       StyleSheet.render.should include( 
 "body {
-  background-color: #666;
+  background-color: #666666;
   font-family: verdana;
 }
 #wrapper {
-  background-color: white;
+  background-color: #FFFFFF;
   margin: 1em auto;
 }
 .foo {
@@ -885,7 +899,7 @@ CSS
 .first,
 .second,
 .third {
-  background-color: black;
+  background-color: #000000;
 }
 CSS
     end
@@ -1020,7 +1034,7 @@ form {
       end
       
       it 'should render embedded properties' do
-        @str.should include "background-color: red"
+        @str.should include "background-color: #{Color.new(:red)}"
       end
     end
     

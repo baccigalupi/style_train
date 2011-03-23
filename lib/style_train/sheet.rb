@@ -294,12 +294,16 @@ CSS
       end
     end
     
-    def opacity(value)
+    def opacity(value, opts={})
       value = value.to_f
       str = ""
       str << property( 'opacity', value )
-      str << property( 'filter', "alpha(opacity=#{(value*100).to_i})")
+      str << alpha( value.to_f*100 ) if opts[:alpha]
       str 
+    end
+    
+    def alpha(value)
+      property('filter', "alpha(opacity=#{(value.to_i)})")
     end
     
     [
